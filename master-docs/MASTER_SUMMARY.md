@@ -10,9 +10,11 @@
 |---|---|
 | **Project** | SaduX Company Profile - Full Dynamic Landing Page CMS |
 | **Stack** | React 19 + Vite 7 + TailwindCSS 4 (Frontend), Express 5 + Sequelize 6 + MySQL (Backend) |
-| **API Base** | `https://api.sadux.my.id/api` (prod), `http://localhost:5202/api` (dev) |
+| **Database** | `sadux_companyprofile_db-development` (XAMPP MySQL) |
+| **API Base** | Dikonfigurasi via `VITE_API_URL` (frontend `.env`) dan `PORT` (backend `.env`) |
 | **Frontend Port** | 5203 (dev) |
-| **Backend Port** | 5000 (default) |
+| **Backend Port** | 5202 (dev) |
+| **Repository** | `https://github.com/Elysian-ibay/Sadux-CompanyProfileSadux.git` |
 
 ---
 
@@ -133,3 +135,36 @@
 3. **Navbar Dynamic Menu** - Menu links masih hardcoded di `Navbar.jsx`
 4. **Testimonial Photo Upload** - Masih pakai avatar huruf pertama, belum ada upload
 5. **`meta_description` field** - Ada di plan V2 tapi belum ada di model GeneralSetting
+
+---
+
+## NPM Scripts (Backend)
+
+| Script | Command | Description |
+|---|---|---|
+| `npm start` | `node server.js` | Jalankan server (production) |
+| `npm run dev` | `nodemon server.js` | Jalankan server (development, auto-reload) |
+| `npm run db:create` | `node scripts/create-db.js` | Buat database jika belum ada |
+| `npm run db:migrate` | `node scripts/migrate.js` | Sync/create semua tables |
+| `npm run db:seed` | `node seed.js` | Isi data awal (admin, content, features, dll) |
+| `npm run db:backup` | `node scripts/backup-db.js` | Backup semua data ke JSON |
+| `npm run db:restore` | `node scripts/restore-db.js` | Restore data dari file backup JSON |
+
+### Quick Start (Local Development)
+
+```bash
+# 1. Pastikan XAMPP MySQL sudah running
+# 2. Backend
+cd backend
+npm run db:create      # Buat database
+npm run db:migrate     # Buat tables
+npm run db:seed        # Isi data awal
+npm run dev            # Jalankan server (port 5202)
+
+# 3. Frontend (terminal baru)
+cd frontend
+npm run dev            # Jalankan Vite (port 5203)
+
+# 4. Buka http://localhost:5203
+# 5. Admin: http://localhost:5203/login (admin / admin123)
+```

@@ -58,26 +58,26 @@ Visitors (analytics tracking)
 
 | Column | Type | Default | Description |
 |---|---|---|---|
-| `hero_title` | STRING | `'MyBoneka'` | Judul utama hero |
-| `hero_subtitle` | STRING | `'Kelembutan Abadi.'` | Subtitle gradient text |
-| `hero_description` | TEXT | *(long default text)* | Paragraph deskripsi |
+| `hero_title` | STRING | `'Sadulur Teknologi Indonesia'` | Judul utama hero |
+| `hero_subtitle` | STRING | `'Innovate. Integrate. Inspire.'` | Subtitle gradient text |
+| `hero_description` | TEXT | `'Transforming businesses with cutting-edge...'` | Paragraph deskripsi |
 | `hero_button_primary_text` | STRING | `'Explore Ecosystem'` | Text tombol utama |
 | `hero_button_primary_link` | STRING | `'#ecosystem'` | Link tombol utama |
-| `hero_button_secondary_text` | STRING | `'Tonton Video'` | Text tombol sekunder |
+| `hero_button_secondary_text` | STRING | `'Watch Video'` | Text tombol sekunder |
 | `hero_button_secondary_link` | STRING | `'#'` | Link tombol sekunder |
 
 ### Feature Section Fields
 
 | Column | Type | Default | Description |
 |---|---|---|---|
-| `feature_title` | STRING | `'Kenapa Memilih MyBoneka?'` | Judul section features |
+| `feature_title` | STRING | `'Our Ecosystem'` | Judul section features |
 
 ### CTA Section Fields
 
 | Column | Type | Default | Description |
 |---|---|---|---|
-| `cta_title` | STRING | `'Siap Memberikan Kebahagiaan?'` | Judul CTA |
-| `cta_description` | TEXT | *(default text)* | Deskripsi CTA |
+| `cta_title` | STRING | `'Ready to Transform Your Business?'` | Judul CTA |
+| `cta_description` | TEXT | `'Join the SaduX network and experience...'` | Deskripsi CTA |
 
 ### Stats Section Fields
 

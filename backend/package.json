@@ -9,6 +9,8 @@
     "db:create": "node scripts/create-db.js",
     "db:migrate": "node scripts/migrate.js",
     "db:seed": "node seed.js",
+    "db:backup": "node scripts/backup-db.js",
+    "db:restore": "node scripts/restore-db.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -5,12 +5,14 @@ import DynamicBackground from '../components/DynamicBackground';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Trophy, Users, ShoppingBag, Globe, Sparkles, MessageCircle, ArrowRight, Play, CheckCircle2, HelpCircle, Briefcase, Zap, ShieldCheck, Activity, Star } from 'lucide-react';
-import api from '../lib/api';
+import api, { SERVER_URL } from '../lib/api';
 
-// Product data placeholder (Fallback)
+// Product data placeholder (Fallback jika API tidak tersedia)
 const productFallback = [
-    { id: 1, name: "Tournament Management", price: "Contact Sales", image: "", tag: "Esports", link: "https://tournament.sadux.my.id", description: "Comprehensive esports tournament organization." },
-    { id: 2, name: "HR Management", price: "Subscription", image: "", tag: "Enterprise", link: "https://hr.sadux.my.id", description: "Streamlined employee tracking and payroll." },
+    { id: 1, name: "Tournament Management System", price: "Contact Sales", image: "", tag: "Esports", description: "A complete platform for organizing, managing, and broadcasting esports tournaments." },
+    { id: 2, name: "SaduX HRIS", price: "Subscription", image: "", tag: "Enterprise", description: "Human Resource Information System tailored for modern companies." },
+    { id: 3, name: "SaduX POS + HR", price: "Bundle", image: "", tag: "Retail", description: "The ultimate retail solution. Combine your sales data with employee performance metrics." },
+    { id: 4, name: "SaduX CMS", price: "License", image: "", tag: "Web", description: "Flexible Landing Page CMS to manage your company profile and marketing content." }
 ];
 
 const FeatureCard = ({ icon: Icon, title, desc }) => (
@@ -78,11 +80,11 @@ const LandingPage = () => {
         trackVisit();
     }, []);
 
-    // Default Fallback
-    const heroTitle = content?.hero_title || "Sadulur Teknologi";
+    // Default Fallback (sesuai seed data)
+    const heroTitle = content?.hero_title || "Sadulur Teknologi Indonesia";
     const heroSubtitle = content?.hero_subtitle || "Innovate. Integrate. Inspire.";
     const heroDesc = content?.hero_description || "Transforming businesses with cutting-edge management ecosystems. From Esports Tournaments to HR and POS solutions, SaduX empowers your digital journey.";
-    const featureTitle = content?.feature_title || "Why SaduX?";
+    const featureTitle = content?.feature_title || "Our Ecosystem";
 
     // Dynamic Styles for Font and Color
     const fontToUrl = (font) => {
@@ -243,7 +245,7 @@ const LandingPage = () => {
                                 )}
                                 <div className={`aspect-video md:w-1/2 relative overflow-hidden bg-gray-900 group`}>
                                     {product.image ? (
-                                        <img src={`http://localhost:5192${product.image}`} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                        <img src={`${SERVER_URL}${product.image}`} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
                                             <span className="text-4xl opacity-50">⚡</span>
@@ -470,9 +472,9 @@ const LandingPage = () => {
             {/* Call to Action */}
             <section className="relative z-10 py-24 px-4 text-center">
                 <div className="max-w-4xl mx-auto">
-                    <h2 className="text-4xl md:text-5xl font-bold mb-6">Ready to Transform Your Business?</h2>
+                    <h2 className="text-4xl md:text-5xl font-bold mb-6">{content?.cta_title || "Ready to Transform Your Business?"}</h2>
                     <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-                        Join the SaduX network and experience the next generation of management software.
+                        {content?.cta_description || "Join the SaduX network and experience the next generation of management software."}
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link to="/register">

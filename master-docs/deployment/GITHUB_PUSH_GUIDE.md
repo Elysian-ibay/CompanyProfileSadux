@@ -65,7 +65,7 @@ Buat file `backend/.env.example`:
 PORT=5202
 DB_HOST=localhost
 DB_PORT=3306
-DB_NAME=sadux_companyprofile_db
+DB_NAME=sadux_companyprofile_db-development
 DB_USER=root
 DB_PASS=
 JWT_SECRET=your_jwt_secret_here

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, Search, Image as ImageIcon, X } from 'lucide-react';
-import api from '../../lib/api';
+import api, { SERVER_URL } from '../../lib/api';
 
 const Products = () => {
     const [products, setProducts] = useState([]);
@@ -134,7 +134,7 @@ const Products = () => {
                         <div className="aspect-square bg-gray-900 relative">
                             {product.image ? (
                                 <img
-                                    src={`http://localhost:5192${product.image}`}
+                                    src={`${SERVER_URL}${product.image}`}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                 />

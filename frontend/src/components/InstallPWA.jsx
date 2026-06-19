@@ -51,7 +51,7 @@ const InstallPWA = () => {
                         </div>
 
                         <div className="flex-1 min-w-0">
-                            <h3 className="text-white font-bold text-sm truncate">Install MyBoneka</h3>
+                            <h3 className="text-white font-bold text-sm truncate">Install SaduX</h3>
                             <p className="text-white/60 text-xs truncate">Akses lebih cepat & offline</p>
                         </div>
 

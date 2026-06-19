@@ -4,15 +4,15 @@ const sequelize = require('../config/database');
 const LandingPageContent = sequelize.define('LandingPageContent', {
     hero_title: {
         type: DataTypes.STRING,
-        defaultValue: 'MyBoneka'
+        defaultValue: 'Sadulur Teknologi Indonesia'
     },
     hero_subtitle: {
         type: DataTypes.STRING,
-        defaultValue: 'Kelembutan Abadi.'
+        defaultValue: 'Innovate. Integrate. Inspire.'
     },
     hero_description: {
         type: DataTypes.TEXT,
-        defaultValue: 'Temukan koleksi boneka eksklusif dengan kualitas terbaik. Dibuat dengan cinta untuk memberikan pelukan hangat di setiap momen spesial Anda.'
+        defaultValue: 'Transforming businesses with cutting-edge management ecosystems. From Esports Tournaments to HR and POS solutions, SaduX empowers your digital journey.'
     },
     hero_button_primary_text: {
         type: DataTypes.STRING,
@@ -24,7 +24,7 @@ const LandingPageContent = sequelize.define('LandingPageContent', {
     },
     hero_button_secondary_text: {
         type: DataTypes.STRING,
-        defaultValue: 'Tonton Video'
+        defaultValue: 'Watch Video'
     },
     hero_button_secondary_link: {
         type: DataTypes.STRING,
@@ -32,15 +32,15 @@ const LandingPageContent = sequelize.define('LandingPageContent', {
     },
     feature_title: {
         type: DataTypes.STRING,
-        defaultValue: 'Kenapa Memilih MyBoneka?'
+        defaultValue: 'Our Ecosystem'
     },
     cta_title: {
         type: DataTypes.STRING,
-        defaultValue: 'Siap Memberikan Kebahagiaan?'
+        defaultValue: 'Ready to Transform Your Business?'
     },
     cta_description: {
         type: DataTypes.TEXT,
-        defaultValue: 'Jangan lewatkan koleksi terbatas kami. Dapatkan penawaran spesial untuk pembelian pertamamu hari ini.'
+        defaultValue: 'Join the SaduX network and experience the next generation of management software.'
     },
     // New Fields
     stats_visible: {

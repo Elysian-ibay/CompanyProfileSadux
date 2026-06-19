@@ -180,6 +180,48 @@
 
 ---
 
+## [v2.2.0] - Code Quality & DevOps Improvements
+
+### Fixed - Hardcoded Values Dipindah ke Environment Variables
+
+- **`frontend/src/lib/api.js`** - `baseURL` sekarang baca dari `VITE_API_URL` env variable, export `SERVER_URL` untuk image URLs
+- **`frontend/src/pages/LandingPage.jsx`** - Image URL pakai `SERVER_URL` (bukan hardcode `localhost:5192`)
+- **`frontend/src/pages/admin/Products.jsx`** - Image URL pakai `SERVER_URL`
+- **`frontend/.env`** - `VITE_API_URL=http://localhost:5202/api`
+- **`backend/.env`** - Dikonfigurasi untuk XAMPP lokal (localhost:3306, root)
+
+### Fixed - Model Defaults Disesuaikan dengan SaduX Branding
+
+- **`backend/models/LandingPageContent.js`** - Default values diubah dari konten "MyBoneka" ke konten SaduX:
+  - `hero_title`: "MyBoneka" -> "Sadulur Teknologi Indonesia"
+  - `hero_subtitle`: "Kelembutan Abadi." -> "Innovate. Integrate. Inspire."
+  - `feature_title`: "Kenapa Memilih MyBoneka?" -> "Our Ecosystem"
+  - `cta_title` & `cta_description` disesuaikan
+
+### Fixed - Frontend Fallback Data Disesuaikan
+
+- **`frontend/src/pages/LandingPage.jsx`** - Product fallback sekarang 4 items (sesuai seed data), hero title fallback konsisten
+- **CTA Section** sekarang dynamic dari `content.cta_title` dan `content.cta_description`
+
+### Added - Database Backup & Restore Scripts
+
+- **`backend/scripts/backup-db.js`** - Export semua data ke JSON file di `backend/backups/`
+  - Usage: `npm run db:backup`
+  - Output: `backups/backup_YYYY-MM-DD_HH-mm-ss.json`
+- **`backend/scripts/restore-db.js`** - Restore data dari backup JSON
+  - Usage: `npm run db:restore` (latest) atau `npm run db:restore backup_file.json`
+- NPM scripts ditambahkan: `db:backup`, `db:restore`
+
+### Added - Documentation
+
+- **`master-docs/MASTER_SUMMARY.md`** - Rangkuman lengkap implementasi V1 & V2
+- **`master-docs/MASTER_CHANGELOG.md`** - Changelog semua perubahan
+- **`master-docs/database/DATABASE_SCHEMA.md`** - Schema semua 9 tables + API routes
+- **`master-docs/deployment/GITHUB_PUSH_GUIDE.md`** - Panduan push ke GitHub
+- **`master-docs/deployment/DEPLOYMENT_GUIDE.md`** - Panduan deploy Vercel + Supabase
+
+---
+
 ## Known Issues / Backlog
 
 | # | Item | Severity | Notes |
