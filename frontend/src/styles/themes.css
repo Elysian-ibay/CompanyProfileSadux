@@ -88,3 +88,26 @@
     background: var(--theme-page-bg, #fdf6e3) !important;
     backdrop-filter: none !important;
 }
+
+/* Retro: neobrutalist mobile menu items (chunky cards, hard shadow, hover accent) */
+[data-theme="retro"] .mobile-menu { padding-left: 1.5rem; padding-right: 1.5rem; }
+[data-theme="retro"] .mobile-menu-link {
+    display: block;
+    background: #fff;
+    color: var(--theme-heading, #111) !important;
+    border: 3px solid var(--theme-ink, #111);
+    box-shadow: 5px 5px 0 var(--theme-ink, #111);
+    padding: 14px 20px;
+    border-radius: 0;
+    text-transform: uppercase;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    transition: transform .08s ease, box-shadow .08s ease, background-color .2s ease;
+}
+[data-theme="retro"] .mobile-menu-link:hover {
+    background: var(--primary-color, #ffd800);
+}
+[data-theme="retro"] .mobile-menu-link:active {
+    transform: translate(3px, 3px);
+    box-shadow: 2px 2px 0 var(--theme-ink, #111);
+}

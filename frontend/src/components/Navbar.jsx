@@ -79,7 +79,7 @@ const Navbar = () => {
                             <a
                                 key={link.name}
                                 href={link.path}
-                                className="text-xl font-medium text-gray-300 hover:text-white"
+                                className="mobile-menu-link text-xl font-medium text-gray-300 hover:text-white"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 {link.name}
