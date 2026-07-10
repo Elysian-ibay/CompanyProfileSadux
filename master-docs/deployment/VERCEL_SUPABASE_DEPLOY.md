@@ -232,6 +232,7 @@ Sudah disiapkan: `frontend/vercel.json` (SPA rewrite agar `/login/super-admin` &
 | Gejala | Penyebab & Solusi |
 |---|---|
 | **CORS blocked** di console | `CLIENT_ORIGIN` di backend belum berisi domain frontend (persis, tanpa trailing slash). Set lalu **Redeploy** backend. |
+| **Backend 500 `FUNCTION_INVOCATION_FAILED` di semua route (termasuk `/`)** | Fungsi crash saat cold start. Dua sebab utama: (1) driver `pg` tak ter-bundle — sudah difix dengan `require('pg')` eksplisit di `config/database.js`; (2) **Environment Variables belum diset** di project backend Vercel (terutama `DATABASE_URL`). Cek Settings → Environment Variables (scope Production), lalu **Redeploy**. |
 | **`relation "..." does not exist`** | Tabel belum dibuat. Jalankan `npm run db:migrate` dari lokal (Langkah 2). |
 | **`connection refused` / timeout ke DB** | Pakai port **6543** (transaction pooler), bukan 5432. SSL sudah otomatis untuk postgres. Cek `DATABASE_URL` benar. |
 | **Login admin gagal / "Invalid Password"** | Belum di-seed. Jalankan `npm run db:seed`. User: `admin`, pass: `admin123`. |
