@@ -12,13 +12,14 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="space-y-4">
-                        {settings.site_logo ? (
-                            <img src={imageUrl(settings.site_logo)} alt={settings.site_name || 'Logo'} className="h-10 w-auto object-contain" />
-                        ) : (
+                        <div className="flex items-center gap-3">
+                            {settings.site_logo && (
+                                <img src={imageUrl(settings.site_logo)} alt={settings.site_name || 'Logo'} className="h-10 w-auto object-contain" />
+                            )}
                             <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
-                                {settings.site_name || 'SaduX'}
+                                SaduX
                             </h3>
-                        )}
+                        </div>
                         <p className="text-gray-400 text-sm leading-relaxed">
                             Sadulur Teknologi Indonesia. Empowering businesses through innovative integrated management ecosystems.
                         </p>

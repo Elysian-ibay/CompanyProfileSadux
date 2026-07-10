@@ -37,13 +37,12 @@ const Navbar = () => {
                         scrolled ? "w-full max-w-5xl shadow-[0_8px_32px_rgba(0,0,0,0.5)]" : "w-full max-w-4xl bg-transparent border-transparent backdrop-blur-none"
                     )}
                 >
-                    {/* Logo */}
-                    <Link to="/" className="mr-8 flex items-center">
-                        {settings.site_logo ? (
+                    {/* Logo + wordmark (keep both when a logo is uploaded) */}
+                    <Link to="/" className="mr-8 flex items-center gap-2.5">
+                        {settings.site_logo && (
                             <img src={imageUrl(settings.site_logo)} alt={settings.site_name || 'Logo'} className="h-9 w-auto object-contain" />
-                        ) : (
-                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400">SaduX</span>
                         )}
+                        <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400">SaduX</span>
                     </Link>
 
                     {/* Desktop Menu */}
