@@ -120,7 +120,7 @@ Sudah disiapkan: `frontend/vercel.json` (SPA rewrite agar route seperti `/login/
 ## Catatan Penting
 
 - **Uploads:** kini via Supabase Storage (`backend/utils/storage.js`). Field `image` menyimpan **URL absolut**; frontend memakai helper `imageUrl()` di `frontend/src/lib/api.js` (URL absolut dipakai apa adanya, path lama `/uploads/..` diprefix `SERVER_URL`).
-- **Keamanan:** backend saat ini **tidak memverifikasi JWT** di route mutasi (create/update/delete terbuka). Pertimbangkan menambah middleware auth sebelum go-live publik. Lihat catatan di memory `backend-auth-gap`.
+- **Keamanan (auth):** semua route mutasi (POST/PUT/DELETE products/content/features/stats/cms, GET analytics dashboard, dan register) kini **diproteksi JWT admin** via `backend/middleware/auth.js`. GET publik & tracking (`/products/:id/click`, `/analytics/visit`, `/auth/login`) tetap terbuka. Admin pertama dibuat oleh `npm run db:seed` (register sekarang admin-only). Pastikan `JWT_SECRET` production kuat.
 - **`backend/.env-dev`** ter-commit di git dan berisi `JWT_SECRET` dev lemah — sebaiknya untrack: `git rm --cached backend/.env-dev`. Untuk production gunakan `JWT_SECRET` baru yang kuat (di Vercel env, bukan di file).
 - **Supabase pooler:** pakai port **6543** (transaction pooler) untuk serverless. Pool di Sequelize sudah dibatasi kecil (`DB_POOL_MAX`, default 3).
 - **Lokal MySQL masih bisa:** set `DB_DIALECT=mysql` + `DATABASE_URL` kosong di `backend/.env` untuk XAMPP; kode mendukung kedua dialect.

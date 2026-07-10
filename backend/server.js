@@ -35,11 +35,12 @@ const productRoutes = require('./routes/productRoutes');
 const authRoutes = require('./routes/authRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 const analyticsController = require('./controllers/analyticsController');
+const { verifyToken, isAdmin } = require('./middleware/auth');
 
 // Analytics Routes (Inline for simplicity or move to file)
 const router = express.Router();
-router.post('/visit', analyticsController.trackVisit);
-router.get('/dashboard', analyticsController.getDashboardStats);
+router.post('/visit', analyticsController.trackVisit); // public: visitor tracking
+router.get('/dashboard', verifyToken, isAdmin, analyticsController.getDashboardStats); // admin only
 app.use('/api/analytics', router);
 
 app.use('/api/products', productRoutes);

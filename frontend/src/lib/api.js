@@ -25,4 +25,21 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
+// On 401 (missing/expired/invalid token) clear the session and send the user
+// back to the admin login. Skip if already on the login page to avoid loops.
+api.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            const loginPath = '/login/super-admin';
+            if (typeof window !== 'undefined' && !window.location.pathname.startsWith(loginPath)) {
+                window.location.href = loginPath;
+            }
+        }
+        return Promise.reject(error);
+    }
+);
+
 export default api;
