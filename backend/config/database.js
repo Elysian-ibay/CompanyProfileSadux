@@ -1,6 +1,16 @@
 const Sequelize = require('sequelize');
 require('dotenv').config();
 
+// Sequelize loads the SQL driver via a *dynamic* require, which Vercel's
+// serverless bundler can miss — causing FUNCTION_INVOCATION_FAILED at cold start.
+// Reference the driver statically so it is always bundled.
+try {
+    require('pg');
+    require('pg-hstore');
+} catch (_) {
+    // pg not needed when running the local MySQL dialect
+}
+
 // Dialect is env-driven so the same code works locally (MySQL/XAMPP)
 // and in production (PostgreSQL / Supabase). Default: postgres.
 const dialect = process.env.DB_DIALECT || 'postgres';
