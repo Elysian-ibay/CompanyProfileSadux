@@ -124,6 +124,7 @@ const LandingPage = () => {
         '--primary-color': accent,
         '--theme-heading': theme.heading_color || '#fff',
         '--theme-muted': theme.muted_color || '#9ca3af',
+        '--theme-page-bg': isLight ? theme.page_bg : undefined,
         '--theme-ink': theme.card_border_color || '#111',
         '--theme-card-border': theme.card_border_color || 'rgba(255,255,255,0.1)',
         '--btn-gradient-start': theme.button_gradient_start || '#2563eb',

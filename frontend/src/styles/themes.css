@@ -81,3 +81,10 @@
     background: #f3ead0 !important;
     border-top: 3px solid var(--theme-ink, #111) !important;
 }
+
+/* Mobile nav overlay: built with bg-black/90; on light themes make it match
+   the page background so the (dark-flipped) menu text stays readable. */
+[data-theme-mode="light"] .mobile-menu {
+    background: var(--theme-page-bg, #fdf6e3) !important;
+    backdrop-filter: none !important;
+}
