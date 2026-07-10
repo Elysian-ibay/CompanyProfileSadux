@@ -26,6 +26,43 @@ const GeneralSetting = sequelize.define('GeneralSetting', {
         type: DataTypes.STRING,
         defaultValue: '© 2025 Sadulur Teknologi Indonesia.'
     },
+    footer_description: {
+        type: DataTypes.TEXT,
+        defaultValue: 'Sadulur Teknologi Indonesia. Empowering businesses through innovative integrated management ecosystems.'
+    },
+    footer_columns: {
+        type: DataTypes.JSON, // [{ title, items: [{ label, url }] }]
+        defaultValue: [
+            { title: 'Products', items: [
+                { label: 'Tournament System', url: '#' },
+                { label: 'HRIS Enterprise', url: '#' },
+                { label: 'POS Integrated', url: '#' },
+                { label: 'Web CMS', url: '#' }
+            ] },
+            { title: 'Company', items: [
+                { label: 'About Us', url: '#' },
+                { label: 'Careers', url: '#' },
+                { label: 'Blog', url: '#' },
+                { label: 'Contact', url: '#' }
+            ] }
+        ]
+    },
+    social_links: {
+        type: DataTypes.JSON, // [{ platform, url }] — platform: instagram|twitter|facebook|linkedin|youtube|tiktok|website
+        defaultValue: [
+            { platform: 'instagram', url: '#' },
+            { platform: 'twitter', url: '#' },
+            { platform: 'facebook', url: '#' }
+        ]
+    },
+    footer_powered_by: {
+        type: DataTypes.STRING,
+        defaultValue: 'SaduX'
+    },
+    footer_powered_by_url: {
+        type: DataTypes.STRING,
+        defaultValue: '#'
+    },
     site_logo: {
         type: DataTypes.STRING, // Supabase Storage URL (navbar/footer logo)
         allowNull: true

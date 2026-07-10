@@ -84,6 +84,18 @@ const ContentManager = () => {
         }
     };
 
+    // --- Footer editing (stored on GeneralSetting) ---
+    const FOOTER_DEFAULT_COLUMNS = [
+        { title: 'Products', items: [{ label: 'Tournament System', url: '#' }, { label: 'HRIS Enterprise', url: '#' }, { label: 'POS Integrated', url: '#' }, { label: 'Web CMS', url: '#' }] },
+        { title: 'Company', items: [{ label: 'About Us', url: '#' }, { label: 'Careers', url: '#' }, { label: 'Blog', url: '#' }, { label: 'Contact', url: '#' }] },
+    ];
+    const FOOTER_DEFAULT_SOCIALS = [{ platform: 'instagram', url: '#' }, { platform: 'twitter', url: '#' }, { platform: 'facebook', url: '#' }];
+    const footerCols = Array.isArray(settings.footer_columns) && settings.footer_columns.length ? settings.footer_columns : FOOTER_DEFAULT_COLUMNS;
+    const footerSocials = Array.isArray(settings.social_links) && settings.social_links.length ? settings.social_links : FOOTER_DEFAULT_SOCIALS;
+    const setFooterCols = (next) => setSettings({ ...settings, footer_columns: next });
+    const setFooterSocials = (next) => setSettings({ ...settings, social_links: next });
+    const SOCIAL_PLATFORMS = ['instagram', 'twitter', 'facebook', 'linkedin', 'youtube', 'website'];
+
     const handleSaveContent = async () => {
         setLoading(true);
         try {
@@ -375,6 +387,7 @@ const ContentManager = () => {
         { id: 'background', label: 'Backgrounds' },
         { id: 'appearance', label: 'Appearance' },
         { id: 'settings', label: 'Settings' },
+        { id: 'footer', label: 'Footer' },
     ];
 
     return (
@@ -1091,6 +1104,81 @@ const ContentManager = () => {
                         </div>
                         <button onClick={handleSaveSettings} disabled={loading} className="w-full py-3 bg-purple-600 rounded-xl font-bold hover:bg-purple-500 transition-colors">
                             {loading ? 'Saving...' : 'Save General Settings'}
+                        </button>
+                    </div>
+                )}
+
+                {/* FOOTER TAB */}
+                {activeTab === 'footer' && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-2">Footer Description</label>
+                            <textarea name="footer_description" value={settings.footer_description || ''} onChange={handleSettingsChange} rows="3" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-purple-500 focus:outline-none" />
+                        </div>
+
+                        {/* Link Columns */}
+                        <div className="bg-black/20 p-5 rounded-2xl border border-white/5">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-purple-300">Kolom Link</h3>
+                                <button onClick={() => setFooterCols([...footerCols, { title: 'Kolom Baru', items: [] }])} className="text-sm px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-lg">+ Kolom</button>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {footerCols.map((col, ci) => (
+                                    <div key={ci} className="border border-white/10 rounded-xl p-4 space-y-3">
+                                        <div className="flex items-center gap-2">
+                                            <input value={col.title || ''} onChange={(e) => setFooterCols(footerCols.map((c, i) => i === ci ? { ...c, title: e.target.value } : c))} className="flex-1 bg-black/40 border border-white/10 rounded-lg p-2 font-semibold focus:border-purple-500 focus:outline-none" placeholder="Judul kolom" />
+                                            <button onClick={() => setFooterCols(footerCols.filter((_, i) => i !== ci))} className="text-red-400 p-2 hover:bg-red-500/10 rounded-lg" title="Hapus kolom">✕</button>
+                                        </div>
+                                        {(col.items || []).map((item, ii) => (
+                                            <div key={ii} className="flex items-center gap-2">
+                                                <input value={item.label || ''} onChange={(e) => setFooterCols(footerCols.map((c, i) => i === ci ? { ...c, items: c.items.map((it, j) => j === ii ? { ...it, label: e.target.value } : it) } : c))} className="flex-1 bg-black/40 border border-white/10 rounded-lg p-2 text-sm focus:border-purple-500 focus:outline-none" placeholder="Label" />
+                                                <input value={item.url || ''} onChange={(e) => setFooterCols(footerCols.map((c, i) => i === ci ? { ...c, items: c.items.map((it, j) => j === ii ? { ...it, url: e.target.value } : it) } : c))} className="flex-1 bg-black/40 border border-white/10 rounded-lg p-2 text-sm focus:border-purple-500 focus:outline-none" placeholder="URL / #anchor" />
+                                                <button onClick={() => setFooterCols(footerCols.map((c, i) => i === ci ? { ...c, items: c.items.filter((_, j) => j !== ii) } : c))} className="text-red-400 p-1.5 hover:bg-red-500/10 rounded" title="Hapus link">✕</button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setFooterCols(footerCols.map((c, i) => i === ci ? { ...c, items: [...(c.items || []), { label: 'New Link', url: '#' }] } : c))} className="text-xs text-cyan-400 hover:underline">+ Tambah link</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Social Media */}
+                        <div className="bg-black/20 p-5 rounded-2xl border border-white/5">
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-purple-300">Social Media</h3>
+                                <button onClick={() => setFooterSocials([...footerSocials, { platform: 'instagram', url: '#' }])} className="text-sm px-3 py-1.5 bg-purple-600 hover:bg-purple-500 rounded-lg">+ Sosial</button>
+                            </div>
+                            <div className="space-y-2">
+                                {footerSocials.map((s, i) => (
+                                    <div key={i} className="flex items-center gap-2">
+                                        <select value={s.platform} onChange={(e) => setFooterSocials(footerSocials.map((x, j) => j === i ? { ...x, platform: e.target.value } : x))} className="bg-black/40 border border-white/10 rounded-lg p-2 text-sm capitalize focus:border-purple-500 focus:outline-none">
+                                            {SOCIAL_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+                                        </select>
+                                        <input value={s.url || ''} onChange={(e) => setFooterSocials(footerSocials.map((x, j) => j === i ? { ...x, url: e.target.value } : x))} className="flex-1 bg-black/40 border border-white/10 rounded-lg p-2 text-sm focus:border-purple-500 focus:outline-none" placeholder="https://..." />
+                                        <button onClick={() => setFooterSocials(footerSocials.filter((_, j) => j !== i))} className="text-red-400 p-2 hover:bg-red-500/10 rounded-lg" title="Hapus">✕</button>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Copyright + Powered by */}
+                        <div className="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-2">Copyright</label>
+                                <input name="footer_copyright" value={settings.footer_copyright || ''} onChange={handleSettingsChange} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-purple-500 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-2">Powered by (teks)</label>
+                                <input name="footer_powered_by" value={settings.footer_powered_by || ''} onChange={handleSettingsChange} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-purple-500 focus:outline-none" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-2">Powered by (link)</label>
+                                <input name="footer_powered_by_url" value={settings.footer_powered_by_url || ''} onChange={handleSettingsChange} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-purple-500 focus:outline-none" />
+                            </div>
+                        </div>
+
+                        <button onClick={handleSaveSettings} disabled={loading} className="w-full py-3 bg-purple-600 rounded-xl font-bold hover:bg-purple-500 transition-colors">
+                            {loading ? 'Saving...' : 'Save Footer'}
                         </button>
                     </div>
                 )}
