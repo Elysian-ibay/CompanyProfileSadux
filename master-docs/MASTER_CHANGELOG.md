@@ -4,6 +4,13 @@
 
 ---
 
+## [v3.2.0] - Branding: logo & favicon upload (2026-07-10)
+
+- **Upload logo & favicon** via CMS (Admin → Content → Settings → Branding). Disimpan ke **Supabase Storage** (folder `branding`), URL di `GeneralSettings.site_logo` / `site_favicon`. Kolom baru → **butuh SQL manual**.
+- Endpoint: `POST /api/cms/logo` (gambar, maks 5MB), `POST /api/cms/favicon` (**PNG saja, maks 500KB**, `middleware/uploadPng.js`). Keduanya protected admin.
+- **Navbar & Footer** menampilkan logo bila di-set (fallback teks). **Favicon tab browser** diambil dari `site_favicon` (di-inject runtime di LandingPage). Footer copyright kini dinamis dari `GeneralSetting`.
+- Catatan: file upload TIDAK bisa disimpan di `frontend/src/assets` (statis/read-only di produksi) — memakai Supabase Storage.
+
 ## [v3.1.0] - UI polish, product ordering, change password (2026-07-10)
 
 - **Ganti password admin** dari panel (Admin → menu profil → Ganti Password). Endpoint `POST /api/auth/change-password` (protected). `authController.changePassword`.

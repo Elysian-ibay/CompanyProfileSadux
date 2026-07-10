@@ -62,6 +62,16 @@ const LandingPage = () => {
                 setSettings(settingsRes.data);
 
                 if (settingsRes.data?.site_title) document.title = settingsRes.data.site_title;
+                if (settingsRes.data?.site_favicon) {
+                    let link = document.querySelector("link[rel~='icon']");
+                    if (!link) {
+                        link = document.createElement('link');
+                        link.rel = 'icon';
+                        document.head.appendChild(link);
+                    }
+                    link.type = 'image/png';
+                    link.href = settingsRes.data.site_favicon;
+                }
 
             } catch (error) {
                 console.error("Failed to fetch landing data", error);

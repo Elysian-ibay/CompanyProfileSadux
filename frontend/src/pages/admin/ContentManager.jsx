@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Plus, Trash2, GripVertical, MessageSquare, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
-import api from '../../lib/api';
+import api, { imageUrl } from '../../lib/api';
 import { THEME_LIST } from '../../lib/themes';
 
 const ContentManager = () => {
@@ -65,6 +65,23 @@ const ContentManager = () => {
 
     const handleSettingsChange = (e) => {
         setSettings({ ...settings, [e.target.name]: e.target.value });
+    };
+
+    // Upload logo / favicon to Supabase Storage via backend, then refresh settings.
+    const [brandingBusy, setBrandingBusy] = useState('');
+    const uploadBranding = async (endpoint, file) => {
+        if (!file) return;
+        setBrandingBusy(endpoint);
+        try {
+            const fd = new FormData();
+            fd.append('image', file);
+            const res = await api.post(`/cms/${endpoint}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            setSettings(res.data.settings);
+        } catch (e) {
+            alert(e.response?.data?.message || 'Upload gagal');
+        } finally {
+            setBrandingBusy('');
+        }
     };
 
     const handleSaveContent = async () => {
@@ -1030,6 +1047,46 @@ const ContentManager = () => {
                             <div>
                                 <label className="block text-sm text-gray-400 mb-2">Footer Copyright</label>
                                 <input name="footer_copyright" value={settings.footer_copyright || ''} onChange={handleSettingsChange} className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-purple-500 focus:outline-none" />
+                            </div>
+
+                            {/* Branding: Logo & Favicon (uploaded to Supabase Storage) */}
+                            <div className="border-t border-white/10 pt-6 mt-2">
+                                <h3 className="text-lg font-semibold mb-1 text-purple-300">Branding</h3>
+                                <p className="text-xs text-gray-500 mb-4">Logo tampil di navbar &amp; footer. Favicon adalah ikon di tab browser. Tersimpan otomatis saat di-upload.</p>
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    {/* Logo */}
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Logo Situs <span className="text-gray-600">(PNG/JPG/WEBP, maks 5MB)</span></label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-20 h-20 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                                                {settings.site_logo
+                                                    ? <img src={imageUrl(settings.site_logo)} alt="logo" className="w-full h-full object-contain" />
+                                                    : <span className="text-xs text-gray-600">No logo</span>}
+                                            </div>
+                                            <label className="cursor-pointer text-sm px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors">
+                                                {brandingBusy === 'logo' ? 'Uploading…' : 'Upload Logo'}
+                                                <input type="file" accept="image/png,image/jpeg,image/webp" className="hidden"
+                                                    onChange={(e) => uploadBranding('logo', e.target.files[0])} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {/* Favicon */}
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-2">Favicon (ikon tab) <span className="text-gray-600">(PNG saja, maks 500KB)</span></label>
+                                        <div className="flex items-center gap-4">
+                                            <div className="w-20 h-20 rounded-xl bg-black/40 border border-white/10 flex items-center justify-center overflow-hidden shrink-0">
+                                                {settings.site_favicon
+                                                    ? <img src={imageUrl(settings.site_favicon)} alt="favicon" className="w-10 h-10 object-contain" />
+                                                    : <span className="text-xs text-gray-600">No icon</span>}
+                                            </div>
+                                            <label className="cursor-pointer text-sm px-4 py-2 rounded-lg bg-purple-600 hover:bg-purple-500 transition-colors">
+                                                {brandingBusy === 'favicon' ? 'Uploading…' : 'Upload Favicon'}
+                                                <input type="file" accept="image/png" className="hidden"
+                                                    onChange={(e) => uploadBranding('favicon', e.target.files[0])} />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                         <button onClick={handleSaveSettings} disabled={loading} className="w-full py-3 bg-purple-600 rounded-xl font-bold hover:bg-purple-500 transition-colors">

@@ -1,15 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Heart, Instagram, Twitter, Facebook, Globe } from 'lucide-react';
+import api, { imageUrl } from '../lib/api';
 
 const Footer = () => {
+    const [settings, setSettings] = useState({});
+    useEffect(() => {
+        api.get('/cms/settings').then((res) => setSettings(res.data)).catch(() => {});
+    }, []);
     return (
         <footer className="site-footer relative z-10 bg-black/60 backdrop-blur-xl border-t border-white/10 pt-16 pb-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
                     <div className="space-y-4">
-                        <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
-                            SaduX
-                        </h3>
+                        {settings.site_logo ? (
+                            <img src={imageUrl(settings.site_logo)} alt={settings.site_name || 'Logo'} className="h-10 w-auto object-contain" />
+                        ) : (
+                            <h3 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-600">
+                                {settings.site_name || 'SaduX'}
+                            </h3>
+                        )}
                         <p className="text-gray-400 text-sm leading-relaxed">
                             Sadulur Teknologi Indonesia. Empowering businesses through innovative integrated management ecosystems.
                         </p>
@@ -53,7 +62,7 @@ const Footer = () => {
 
                 <div className="border-t border-white/10 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-gray-500 text-sm">
-                        &copy; 2025 Sadulur Teknologi Indonesia. All rights reserved.
+                        {settings.footer_copyright || '© 2025 Sadulur Teknologi Indonesia. All rights reserved.'}
                     </p>
 
                     <div className="flex items-center gap-2 text-sm text-gray-400 bg-white/5 px-4 py-2 rounded-full border border-white/5">

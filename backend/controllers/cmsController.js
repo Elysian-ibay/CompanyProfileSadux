@@ -1,5 +1,24 @@
 const db = require('../models');
 const GeneralSetting = db.GeneralSetting;
+const { uploadFile } = require('../utils/storage');
+
+// Shared helper: upload a branding image to Supabase Storage and store its URL
+// in the given GeneralSetting field (site_logo / site_favicon).
+async function uploadBranding(req, res, field) {
+    try {
+        if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
+        const url = await uploadFile(req.file, 'branding');
+        let settings = await GeneralSetting.findOne();
+        if (!settings) settings = await GeneralSetting.create({});
+        await settings.update({ [field]: url });
+        res.status(200).json({ url, settings });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
+exports.uploadLogo = (req, res) => uploadBranding(req, res, 'site_logo');
+exports.uploadFavicon = (req, res) => uploadBranding(req, res, 'site_favicon');
 
 exports.getSettings = async (req, res) => {
     try {

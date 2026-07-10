@@ -25,6 +25,14 @@ const GeneralSetting = sequelize.define('GeneralSetting', {
     footer_copyright: {
         type: DataTypes.STRING,
         defaultValue: '© 2025 Sadulur Teknologi Indonesia.'
+    },
+    site_logo: {
+        type: DataTypes.STRING, // Supabase Storage URL (navbar/footer logo)
+        allowNull: true
+    },
+    site_favicon: {
+        type: DataTypes.STRING, // Supabase Storage URL (browser tab icon, PNG)
+        allowNull: true
     }
 });
 

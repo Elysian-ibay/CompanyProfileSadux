@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { Menu, X } from 'lucide-react';
+import api, { imageUrl } from '../lib/api';
 
 const Navbar = () => {
     const [scrolled, setScrolled] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [settings, setSettings] = useState({});
     const location = useLocation();
 
     useEffect(() => {
@@ -13,6 +15,7 @@ const Navbar = () => {
             setScrolled(window.scrollY > 20);
         };
         window.addEventListener('scroll', handleScroll);
+        api.get('/cms/settings').then((res) => setSettings(res.data)).catch(() => {});
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
 
@@ -35,8 +38,12 @@ const Navbar = () => {
                     )}
                 >
                     {/* Logo */}
-                    <Link to="/" className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 mr-8">
-                        SaduX
+                    <Link to="/" className="mr-8 flex items-center">
+                        {settings.site_logo ? (
+                            <img src={imageUrl(settings.site_logo)} alt={settings.site_name || 'Logo'} className="h-9 w-auto object-contain" />
+                        ) : (
+                            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400">SaduX</span>
+                        )}
                     </Link>
 
                     {/* Desktop Menu */}
