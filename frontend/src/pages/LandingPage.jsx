@@ -4,7 +4,7 @@ import Footer from '../components/Footer';
 import DynamicBackground from '../components/DynamicBackground';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Trophy, Users, ShoppingBag, Globe, Sparkles, MessageCircle, ArrowRight, Play, CheckCircle2, HelpCircle, Briefcase, Zap, ShieldCheck, Activity, Star } from 'lucide-react';
+import { Trophy, Users, ShoppingBag, Globe, Sparkles, MessageCircle, ArrowRight, Play, CheckCircle2, HelpCircle, Briefcase, Zap, ShieldCheck, Activity, Star, Rocket, Cpu, Cloud, Code2 } from 'lucide-react';
 import api, { imageUrl } from '../lib/api';
 import { resolveThemeSettings } from '../lib/themes';
 import '../styles/themes.css';
@@ -139,6 +139,12 @@ const LandingPage = () => {
         ? { background: 'transparent', color: theme.heading_color || '#111', border: `3px solid ${theme.card_border_color || '#111'}`, boxShadow: `5px 5px 0 ${theme.card_border_color || '#111'}` }
         : {};
 
+    // Hero badge: readable in every theme (solid accent + dark text on light, translucent on dark).
+    const badgeStyle = isLight
+        ? { background: accent, color: theme.button_text || theme.heading_color || '#111', border: `2px solid ${theme.card_border_color || '#111'}`, backdropFilter: 'none' }
+        : { color: 'var(--primary-color)' };
+    const badgeDotColor = isLight ? (theme.card_border_color || '#111') : 'var(--primary-color)';
+
     // Helper for Section Styles
     const getSectionStyle = (sectionKey) => {
         const config = content?.theme_settings?.sections?.[sectionKey];
@@ -199,13 +205,15 @@ const LandingPage = () => {
                     transition={{ duration: 0.8, ease: "easeOut" }}
                     className="max-w-5xl mx-auto"
                 >
-                    <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full border border-[var(--primary-color)]/30 bg-[var(--primary-color)]/10 backdrop-blur-md text-sm font-medium hover:bg-[var(--primary-color)]/20 transition-colors cursor-default" style={{ color: 'var(--primary-color)' }}>
+                    {(content?.hero_badge_text ?? 'Premier Tech Ecosystem Management') !== '' && (
+                    <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 rounded-full text-sm font-semibold transition-colors cursor-default" style={badgeStyle}>
                         <span className="relative flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: 'var(--primary-color)' }}></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: 'var(--primary-color)' }}></span>
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: badgeDotColor }}></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2" style={{ backgroundColor: badgeDotColor }}></span>
                         </span>
-                        Premier Tech Ecosystem Management
+                        {content?.hero_badge_text ?? 'Premier Tech Ecosystem Management'}
                     </div>
+                    )}
 
                     <h1 className={`${getTitleSizeClass('hero', 'text-4xl md:text-6xl')} font-extrabold tracking-tight mb-8 leading-tight`}
                         style={{
@@ -481,24 +489,44 @@ const LandingPage = () => {
                             </button>
                         </div>
                         <div className="relative">
-                            {/* Product Showcase Visual */}
-                            <div className="relative z-10 w-full aspect-[4/5] rounded-[2rem] bg-gradient-to-b from-white/10 to-transparent border border-white/20 backdrop-blur-md flex items-center justify-center overflow-hidden group">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 via-transparent to-blue-500/20 opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
-                                <div className="text-center p-8 transform group-hover:scale-105 transition-transform duration-500">
-                                    <Sparkles className="w-32 h-32 text-cyan-300 mx-auto mb-6 opacity-80" />
-                                    <span className="text-2xl text-cyan-200 font-bold tracking-widest block mb-2">SADUX</span>
-                                    <span className="text-sm text-cyan-200/60 uppercase tracking-[0.2em]">Technology</span>
-                                </div>
+                            {/* Product Showcase Visual (shows uploaded teaser_image if set, else a themed graphic) */}
+                            {content?.teaser_image ? (
+                                <img src={imageUrl(content.teaser_image)} alt="Showcase" className="themed-card relative z-10 w-full aspect-[4/5] object-cover" style={{ ...cardStyle, borderRadius: cardRadius }} />
+                            ) : (
+                                <div className="themed-card relative z-10 w-full aspect-[4/5] flex flex-col items-center justify-center overflow-hidden p-8 group" style={{ ...cardStyle, borderRadius: cardRadius }}>
+                                    {/* Ambient accent glow */}
+                                    <div className="absolute -top-16 -right-16 w-56 h-56 rounded-full blur-[90px] opacity-40" style={{ background: accent }} />
+                                    <div className="absolute -bottom-20 -left-16 w-56 h-56 rounded-full blur-[90px] opacity-30" style={{ background: theme.button_gradient_end || accent }} />
 
-                                {/* Floating badges */}
-                                <div className="absolute top-8 right-8 bg-white/10 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold border border-white/10">
-                                    SECURE
-                                </div>
-                            </div>
+                                    {/* Central rocket tile */}
+                                    <div className="relative z-10 mb-8 w-28 h-28 rounded-3xl flex items-center justify-center transition-transform duration-500 group-hover:-translate-y-1 group-hover:rotate-3"
+                                        style={{ background: accent, border: `3px solid ${theme.card_border_color || '#111'}`, boxShadow: isLight ? `6px 6px 0 ${theme.card_border_color || '#111'}` : '0 10px 40px rgba(0,0,0,0.35)' }}>
+                                        <Rocket className="w-14 h-14" style={{ color: '#0f172a' }} strokeWidth={2.2} />
+                                    </div>
 
-                            {/* Background decorative elements */}
-                            <div className="absolute -top-10 -right-10 w-40 h-40 bg-cyan-500/30 rounded-full blur-3xl -z-10" />
-                            <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-blue-500/30 rounded-full blur-3xl -z-10" />
+                                    <span className="relative z-10 text-3xl font-extrabold tracking-tight mb-1">SaduX</span>
+                                    <span className="relative z-10 text-xs uppercase tracking-[0.3em] opacity-70 mb-8">Technology</span>
+
+                                    {/* Capability chips */}
+                                    <div className="relative z-10 grid grid-cols-4 gap-3 w-full max-w-xs">
+                                        {[{ Icon: Cloud, label: 'Cloud' }, { Icon: Cpu, label: 'AI' }, { Icon: Code2, label: 'Dev' }, { Icon: ShieldCheck, label: 'Secure' }].map(({ Icon, label }, i) => (
+                                            <div key={i} className="flex flex-col items-center gap-1.5">
+                                                <div className="w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 hover:-translate-y-1"
+                                                    style={{ background: isLight ? '#fff' : 'rgba(255,255,255,0.06)', border: `2px solid ${theme.card_border_color || 'rgba(255,255,255,0.15)'}`, boxShadow: isLight ? `3px 3px 0 ${theme.card_border_color || '#111'}` : 'none' }}>
+                                                    <Icon className="w-5 h-5" style={{ color: isLight ? (theme.heading_color || '#111') : accent }} />
+                                                </div>
+                                                <span className="text-[10px] uppercase tracking-wider opacity-60">{label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* SECURE floating badge */}
+                                    <div className="absolute top-6 right-6 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5"
+                                        style={{ background: accent, color: '#0f172a', border: `2px solid ${theme.card_border_color || '#111'}` }}>
+                                        <ShieldCheck className="w-3.5 h-3.5" /> SECURE
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

@@ -430,6 +430,16 @@ const ContentManager = () => {
                     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
                         <div className="grid gap-6">
                             <div>
+                                <label className="block text-sm text-gray-400 mb-2">Hero Badge Text <span className="text-gray-600">(kosongkan untuk sembunyikan)</span></label>
+                                <input
+                                    name="hero_badge_text"
+                                    value={content.hero_badge_text || ''}
+                                    onChange={handleContentChange}
+                                    placeholder="e.g. Premier Tech Ecosystem Management"
+                                    className="w-full bg-black/40 border border-white/10 rounded-xl p-3 focus:border-purple-500 focus:outline-none"
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm text-gray-400 mb-2">Main Title</label>
                                 <input
                                     name="hero_title"

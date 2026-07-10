@@ -29,6 +29,10 @@ const Product = sequelize.define('Product', {
     click_count: {
         type: DataTypes.INTEGER,
         defaultValue: 0
+    },
+    order: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0 // display order (ASC) — set via drag-and-drop in admin
     }
 });
 

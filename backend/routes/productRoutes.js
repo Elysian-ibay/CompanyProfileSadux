@@ -5,6 +5,7 @@ const upload = require('../middleware/upload');
 const { verifyToken, isAdmin } = require('../middleware/auth');
 
 router.get('/', productController.getAllProducts);
+router.put('/reorder', verifyToken, isAdmin, productController.reorderProducts);
 router.post('/', verifyToken, isAdmin, upload.single('image'), productController.createProduct);
 router.put('/:id', verifyToken, isAdmin, upload.single('image'), productController.updateProduct);
 router.post('/:id/click', productController.incrementClick); // public: visitor click tracking

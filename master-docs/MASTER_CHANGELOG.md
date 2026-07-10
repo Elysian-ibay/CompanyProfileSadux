@@ -4,6 +4,15 @@
 
 ---
 
+## [v3.1.0] - UI polish, product ordering, change password (2026-07-10)
+
+- **Ganti password admin** dari panel (Admin → menu profil → Ganti Password). Endpoint `POST /api/auth/change-password` (protected). `authController.changePassword`.
+- **Urutan produk drag-and-drop** di admin (`Products.jsx`, HTML5 DnD). Kolom baru `Products.order`; endpoint `PUT /api/products/reorder`; `getAllProducts` order by `order,id`. Landing page ikut urutan.
+- **Hero badge editable via CMS** (`hero_badge_text`) + styling readable di tema retro (solid accent + teks gelap, bukan kuning-di-kuning). Input di tab Hero.
+- **Footer** dibuat terbaca di tema terang/retro (`site-footer` + `themes.css`).
+- **Visual teaser** diganti lebih menarik (rocket tile + capability chips, themed) + dukung `teaser_image` bila di-upload.
+- **Butuh SQL manual** untuk kolom baru di DB yang sudah ada (lihat catatan rilis / chat): `Products.order`, `LandingPageContents.hero_badge_text`.
+
 ## [v3.0.0] - Production Deploy, Auth, & Theme System (2026-07-10)
 
 > Aplikasi kini **LIVE** di Vercel + Supabase. Ringkasan serah-terima: `handoff/HANDOFF.md`.

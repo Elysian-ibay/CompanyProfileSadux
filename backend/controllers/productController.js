@@ -2,10 +2,27 @@ const db = require('../models');
 const Product = db.Product;
 const { uploadFile } = require('../utils/storage');
 
-// Get all products
+// Get all products (ordered by display order, then id)
 exports.getAllProducts = async (req, res) => {
     try {
-        const products = await Product.findAll();
+        const products = await Product.findAll({ order: [['order', 'ASC'], ['id', 'ASC']] });
+        res.status(200).json(products);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// Reorder products — body: { ids: [id1, id2, ...] } in the desired order
+exports.reorderProducts = async (req, res) => {
+    try {
+        const { ids } = req.body;
+        if (!Array.isArray(ids)) {
+            return res.status(400).json({ message: 'ids must be an array' });
+        }
+        await Promise.all(
+            ids.map((id, index) => Product.update({ order: index }, { where: { id } }))
+        );
+        const products = await Product.findAll({ order: [['order', 'ASC'], ['id', 'ASC']] });
         res.status(200).json(products);
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -191,7 +191,7 @@ Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md).
 
 | Prioritas | Item |
 |---|---|
-| 🔴 Tinggi | **Ganti password admin default** (`admin/admin123`). Belum ada UI ganti password — rekomendasi: tambah fitur ganti password di admin, atau update hash via script. |
+| 🔴 Tinggi | **Ganti password admin default** (`admin/admin123`). Sekarang **sudah ada UI**: Admin → menu profil (kanan atas) → **Ganti Password**. Segera ganti. |
 | 🟡 Sedang | `backend/.env-dev` masih ter-track di git (berisi JWT dev lemah) — sebaiknya `git rm --cached backend/.env-dev`. |
 | 🟡 Sedang | Navbar & Footer masih hardcoded (belum konsumsi `GeneralSetting`). |
 | 🟢 Rendah | Upload foto testimonial & teaser image belum ada UI (produk sudah bisa upload). |

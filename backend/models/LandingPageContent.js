@@ -2,6 +2,10 @@ const { DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
 const LandingPageContent = sequelize.define('LandingPageContent', {
+    hero_badge_text: {
+        type: DataTypes.STRING,
+        defaultValue: 'Premier Tech Ecosystem Management'
+    },
     hero_title: {
         type: DataTypes.STRING,
         defaultValue: 'Sadulur Teknologi Indonesia'

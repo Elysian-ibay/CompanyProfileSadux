@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Search, Image as ImageIcon, X } from 'lucide-react';
+import { Plus, Pencil, Trash2, Search, Image as ImageIcon, X, GripVertical } from 'lucide-react';
 import api, { imageUrl } from '../../lib/api';
 
 const Products = () => {
@@ -8,6 +8,8 @@ const Products = () => {
     const [loading, setLoading] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editingId, setEditingId] = useState(null);
+    const [dragIndex, setDragIndex] = useState(null);
+    const [savingOrder, setSavingOrder] = useState(false);
 
     // Form State
     const [formData, setFormData] = useState({
@@ -29,6 +31,30 @@ const Products = () => {
             setProducts(res.data);
         } catch (error) {
             console.error(error);
+        }
+    };
+
+    // --- Drag & drop reordering ---
+    const handleDragStart = (index) => setDragIndex(index);
+    const handleDragOver = (e) => e.preventDefault();
+    const handleDrop = async (dropIndex) => {
+        if (dragIndex === null || dragIndex === dropIndex) {
+            setDragIndex(null);
+            return;
+        }
+        const reordered = [...products];
+        const [moved] = reordered.splice(dragIndex, 1);
+        reordered.splice(dropIndex, 0, moved);
+        setProducts(reordered); // optimistic
+        setDragIndex(null);
+        setSavingOrder(true);
+        try {
+            await api.put('/products/reorder', { ids: reordered.map((p) => p.id) });
+        } catch (error) {
+            console.error(error);
+            fetchProducts(); // revert to server order on failure
+        } finally {
+            setSavingOrder(false);
         }
     };
 
@@ -127,11 +153,28 @@ const Products = () => {
                 </button>
             </div>
 
+            {/* Reorder hint */}
+            <div className="flex items-center gap-2 mb-4 text-xs text-gray-500">
+                <GripVertical className="w-4 h-4" />
+                <span>Seret &amp; lepas kartu untuk mengatur urutan tampil di landing page.</span>
+                {savingOrder && <span className="text-cyan-400">Menyimpan urutan…</span>}
+            </div>
+
             {/* Products Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {products.map((product) => (
-                    <div key={product.id} className="group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all">
+                {products.map((product, index) => (
+                    <div
+                        key={product.id}
+                        draggable
+                        onDragStart={() => handleDragStart(index)}
+                        onDragOver={handleDragOver}
+                        onDrop={() => handleDrop(index)}
+                        className={`group bg-white/5 border border-white/10 rounded-2xl overflow-hidden hover:border-purple-500/30 transition-all cursor-move ${dragIndex === index ? 'opacity-40 ring-2 ring-cyan-500/50' : ''}`}
+                    >
                         <div className="aspect-square bg-gray-900 relative">
+                            <div className="absolute top-2 right-2 z-10 p-1 rounded-md bg-black/50 text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity" title="Seret untuk mengurutkan">
+                                <GripVertical className="w-4 h-4" />
+                            </div>
                             {product.image ? (
                                 <img
                                     src={imageUrl(product.image)}

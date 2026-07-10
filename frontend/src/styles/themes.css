@@ -69,3 +69,15 @@
 /* Themed cards get a subtle lift on hover when they carry a hard shadow */
 .themed-card { transition: transform .12s ease, box-shadow .12s ease; }
 [data-theme="retro"] .themed-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--theme-ink, #111) !important; }
+
+/* Footer: the shell is built dark (bg-black/60). On light themes give it a
+   readable light surface so the flipped (dark) text is legible. */
+[data-theme-mode="light"] .site-footer {
+    background: rgba(0, 0, 0, 0.04) !important;
+    backdrop-filter: none !important;
+    border-top-color: var(--theme-card-border, rgba(0, 0, 0, 0.15)) !important;
+}
+[data-theme="retro"] .site-footer {
+    background: #f3ead0 !important;
+    border-top: 3px solid var(--theme-ink, #111) !important;
+}

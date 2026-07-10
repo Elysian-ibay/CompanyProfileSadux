@@ -1,13 +1,44 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import GalaxyBackground from '../components/GalaxyBackground';
-import { Package, LogOut, LayoutDashboard, Settings, User, Sparkles, ChevronDown } from 'lucide-react';
+import { Package, LogOut, LayoutDashboard, KeyRound, User, Sparkles, ChevronDown, X } from 'lucide-react';
+import api from '../lib/api';
 
 const AdminLayout = () => {
     const navigate = useNavigate();
     const location = useLocation();
     const [isProfileOpen, setIsProfileOpen] = useState(false);
     const profileRef = useRef(null);
+
+    // Change password modal
+    const [showPwModal, setShowPwModal] = useState(false);
+    const [pwForm, setPwForm] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [pwLoading, setPwLoading] = useState(false);
+    const [pwMsg, setPwMsg] = useState({ type: '', text: '' });
+
+    const handleChangePassword = async (e) => {
+        e.preventDefault();
+        setPwMsg({ type: '', text: '' });
+        if (pwForm.newPassword.length < 6) {
+            return setPwMsg({ type: 'error', text: 'Password baru minimal 6 karakter.' });
+        }
+        if (pwForm.newPassword !== pwForm.confirmPassword) {
+            return setPwMsg({ type: 'error', text: 'Konfirmasi password tidak cocok.' });
+        }
+        setPwLoading(true);
+        try {
+            await api.post('/auth/change-password', {
+                currentPassword: pwForm.currentPassword,
+                newPassword: pwForm.newPassword,
+            });
+            setPwMsg({ type: 'success', text: 'Password berhasil diganti.' });
+            setPwForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err) {
+            setPwMsg({ type: 'error', text: err.response?.data?.message || 'Gagal mengganti password.' });
+        } finally {
+            setPwLoading(false);
+        }
+    };
 
     useEffect(() => {
         const token = localStorage.getItem('token');
@@ -104,9 +135,12 @@ const AdminLayout = () => {
                                     <div className="text-sm font-bold text-white">Administrator</div>
                                     <div className="text-xs text-gray-400">Super Admin</div>
                                 </div>
-                                <button className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white flex items-center gap-2 transition-colors">
-                                    <Settings size={16} />
-                                    Settings
+                                <button
+                                    onClick={() => { setIsProfileOpen(false); setPwMsg({ type: '', text: '' }); setShowPwModal(true); }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-white/10 hover:text-white flex items-center gap-2 transition-colors"
+                                >
+                                    <KeyRound size={16} />
+                                    Ganti Password
                                 </button>
                                 <div className="h-px bg-white/10 my-1" />
                                 <button
@@ -124,6 +158,47 @@ const AdminLayout = () => {
                     <Outlet />
                 </div>
             </main>
+
+            {/* Change Password Modal */}
+            {showPwModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-md p-6 relative">
+                        <button onClick={() => setShowPwModal(false)} className="absolute top-4 right-4 text-gray-500 hover:text-white">
+                            <X className="w-5 h-5" />
+                        </button>
+                        <h2 className="text-xl font-bold mb-1 flex items-center gap-2"><KeyRound className="w-5 h-5 text-cyan-400" /> Ganti Password</h2>
+                        <p className="text-sm text-gray-400 mb-6">Amankan akun admin Anda dengan password baru.</p>
+
+                        {pwMsg.text && (
+                            <div className={`px-4 py-3 rounded-lg mb-4 text-sm border ${pwMsg.type === 'success' ? 'bg-green-500/15 text-green-300 border-green-500/30' : 'bg-red-500/15 text-red-300 border-red-500/30'}`}>
+                                {pwMsg.text}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleChangePassword} className="space-y-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Password Saat Ini</label>
+                                <input type="password" value={pwForm.currentPassword} onChange={(e) => setPwForm({ ...pwForm, currentPassword: e.target.value })} required
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-cyan-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Password Baru</label>
+                                <input type="password" value={pwForm.newPassword} onChange={(e) => setPwForm({ ...pwForm, newPassword: e.target.value })} required minLength={6}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-cyan-500" />
+                            </div>
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Konfirmasi Password Baru</label>
+                                <input type="password" value={pwForm.confirmPassword} onChange={(e) => setPwForm({ ...pwForm, confirmPassword: e.target.value })} required
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-cyan-500" />
+                            </div>
+                            <button type="submit" disabled={pwLoading}
+                                className="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 rounded-xl mt-2 disabled:opacity-50">
+                                {pwLoading ? 'Menyimpan…' : 'Simpan Password Baru'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
