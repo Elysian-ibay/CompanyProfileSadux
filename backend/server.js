@@ -11,12 +11,19 @@ const PORT = process.env.PORT || 5000;
 
 // CORS: restrict to allowed origins in production (comma-separated CLIENT_ORIGIN),
 // allow all when not configured (local dev).
+// Normalize allowed origins (trim + drop trailing slash) so minor typos in
+// CLIENT_ORIGIN don't break CORS. Unset => allow all (local dev).
 const allowedOrigins = process.env.CLIENT_ORIGIN
-    ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim())
+    ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim().replace(/\/$/, '')).filter(Boolean)
     : null;
 
 app.use(cors({
-    origin: allowedOrigins || '*',
+    origin: (origin, cb) => {
+        // Allow same-origin / server-to-server (no Origin header), and allow all when unconfigured.
+        if (!origin || !allowedOrigins || allowedOrigins.length === 0) return cb(null, true);
+        const clean = origin.replace(/\/$/, '');
+        return cb(null, allowedOrigins.includes(clean));
+    },
     credentials: true,
 }));
 app.use(express.json());
