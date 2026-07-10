@@ -1,5 +1,9 @@
 # Deployment Guide - Vercel (Frontend) + Supabase (Database)
 
+> ⚠️ **USANG / SUPERSEDED.** Dokumen ini mengasumsikan backend di-host di VPS/Railway/Render.
+> Untuk arsitektur terbaru (frontend **dan** backend sama-sama di Vercel + Supabase Postgres/Storage),
+> gunakan **[VERCEL_SUPABASE_DEPLOY.md](./VERCEL_SUPABASE_DEPLOY.md)**. File ini disimpan sebagai referensi opsi VPS.
+
 > Deploy SaduX Company Profile dengan frontend di Vercel dan database di Supabase (PostgreSQL).
 
 ---
