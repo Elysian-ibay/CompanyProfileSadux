@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Save, Loader2, Plus, Trash2, GripVertical, MessageSquare, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
 import api from '../../lib/api';
+import { THEME_LIST } from '../../lib/themes';
 
 const ContentManager = () => {
     const [loading, setLoading] = useState(false);
@@ -798,86 +799,31 @@ const ContentManager = () => {
                                 <span className="p-1 bg-emerald-500/20 rounded">🎨</span> Preset Themes
                             </h3>
                             <div className="grid md:grid-cols-3 gap-4">
-                                {/* Modern Tech Theme */}
-                                <button
-                                    onClick={() => setContent({
-                                        ...content,
-                                        active_theme: 'modern_tech',
-                                        background_style: 'galaxy',
-                                        theme_settings: {
-                                            font_heading: 'Outfit',
-                                            font_body: 'Inter',
-                                            button_style: 'rounded-xl',
-                                            button_gradient_start: '#3b82f6', // blue-500
-                                            button_gradient_end: '#8b5cf6', // violet-500
-                                            card_bg_opacity: 0.08,
-                                            card_blur: 'xl',
-                                            card_border_color: 'rgba(255,255,255,0.1)'
-                                        }
-                                    })}
-                                    className={`p-4 rounded-xl border text-left transition-all ${content.active_theme === 'modern_tech' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-black/40 hover:border-white/30'}`}
-                                >
-                                    <div className="font-bold text-white mb-1">Modern Tech</div>
-                                    <div className="text-xs text-gray-400 mb-3">Blue/Violet Gradients, Clean Sans Fonts, High Glassmorphism.</div>
-                                    <div className="flex gap-2">
-                                        <div className="w-6 h-6 rounded bg-gradient-to-r from-blue-500 to-violet-500"></div>
-                                        <div className="w-6 h-6 rounded bg-black border border-white/10"></div>
-                                    </div>
-                                </button>
-
-                                {/* Creative Studio Theme */}
-                                <button
-                                    onClick={() => setContent({
-                                        ...content,
-                                        active_theme: 'creative_studio',
-                                        background_style: 'sunny_clouds',
-                                        theme_settings: {
-                                            font_heading: 'Space Grotesk',
-                                            font_body: 'Outfit',
-                                            button_style: 'rounded-full',
-                                            button_gradient_start: '#ec4899', // pink-500
-                                            button_gradient_end: '#f43f5e', // rose-500
-                                            card_bg_opacity: 0.15,
-                                            card_blur: 'md',
-                                            card_border_color: 'rgba(236, 72, 153, 0.3)'
-                                        }
-                                    })}
-                                    className={`p-4 rounded-xl border text-left transition-all ${content.active_theme === 'creative_studio' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-black/40 hover:border-white/30'}`}
-                                >
-                                    <div className="font-bold text-white mb-1">Creative Studio</div>
-                                    <div className="text-xs text-gray-400 mb-3">Vibrant Pink/Rose, Geometric Fonts, Playful Roundness.</div>
-                                    <div className="flex gap-2">
-                                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-pink-500 to-rose-500"></div>
-                                        <div className="w-6 h-6 rounded-full bg-white/10 border border-pink-500/30"></div>
-                                    </div>
-                                </button>
-
-                                {/* Elegant Dark Theme */}
-                                <button
-                                    onClick={() => setContent({
-                                        ...content,
-                                        active_theme: 'elegant_dark',
-                                        background_style: 'starry_night',
-                                        theme_settings: {
-                                            font_heading: 'Playfair Display',
-                                            font_body: 'Lato',
-                                            button_style: 'rounded-none',
-                                            button_gradient_start: '#d4af37', // goldish
-                                            button_gradient_end: '#c0c0c0', // silver
-                                            card_bg_opacity: 0.7,
-                                            card_blur: 'none',
-                                            card_border_color: 'rgba(212, 175, 55, 0.2)'
-                                        }
-                                    })}
-                                    className={`p-4 rounded-xl border text-left transition-all ${content.active_theme === 'elegant_dark' ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-black/40 hover:border-white/30'}`}
-                                >
-                                    <div className="font-bold text-white mb-1">Elegant Dark</div>
-                                    <div className="text-xs text-gray-400 mb-3">Gold/Silver Accents, Serif Fonts, Solid Premium Feel.</div>
-                                    <div className="flex gap-2">
-                                        <div className="w-6 h-6 rounded-none bg-gradient-to-r from-[#d4af37] to-[#c0c0c0]"></div>
-                                        <div className="w-6 h-6 rounded-none bg-zinc-900 border border-[#d4af37]/30"></div>
-                                    </div>
-                                </button>
+                                {THEME_LIST.map((t) => (
+                                    <button
+                                        key={t.id}
+                                        onClick={() => setContent({
+                                            ...content,
+                                            active_theme: t.id,
+                                            background_style: t.background_style,
+                                            accent_color: t.theme_settings.accent || content.accent_color,
+                                            // preserve any per-section custom styling the user set
+                                            theme_settings: { ...t.theme_settings, sections: content.theme_settings?.sections }
+                                        })}
+                                        className={`p-4 rounded-xl border text-left transition-all ${content.active_theme === t.id ? 'border-emerald-500 bg-emerald-500/10' : 'border-white/10 bg-black/40 hover:border-white/30'}`}
+                                    >
+                                        <div className="font-bold text-white mb-1 flex items-center gap-2">
+                                            {t.label}
+                                            {t.id === 'retro' && <span className="text-[10px] px-1.5 py-0.5 rounded bg-yellow-400/20 text-yellow-300 border border-yellow-400/30">DEFAULT</span>}
+                                        </div>
+                                        <div className="text-xs text-gray-400 mb-3">{t.description}</div>
+                                        <div className="flex gap-2">
+                                            {t.swatches.map((c, i) => (
+                                                <div key={i} className="w-6 h-6 rounded border border-white/10" style={{ background: c }}></div>
+                                            ))}
+                                        </div>
+                                    </button>
+                                ))}
                             </div>
                         </div>
 

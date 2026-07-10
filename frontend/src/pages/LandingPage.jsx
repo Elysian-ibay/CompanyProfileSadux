@@ -6,6 +6,8 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Trophy, Users, ShoppingBag, Globe, Sparkles, MessageCircle, ArrowRight, Play, CheckCircle2, HelpCircle, Briefcase, Zap, ShieldCheck, Activity, Star } from 'lucide-react';
 import api, { imageUrl } from '../lib/api';
+import { resolveThemeSettings } from '../lib/themes';
+import '../styles/themes.css';
 
 // Product data placeholder (Fallback jika API tidak tersedia)
 const productFallback = [
@@ -92,19 +94,50 @@ const LandingPage = () => {
         return `https://fonts.googleapis.com/css2?family=${font.replace(/ /g, '+')}:wght@300;400;600;700;800&display=swap`;
     };
 
+    // Resolve the active theme (fills in every field, retro is the default).
+    const theme = resolveThemeSettings(content?.active_theme, content?.theme_settings);
+    const isLight = theme.mode === 'light';
+    const accent = theme.accent || content?.accent_color || '#06b6d4';
+
+    const blurValue = theme.card_blur === 'none' ? '0'
+        : theme.card_blur === 'xl' ? '24px'
+        : theme.card_blur === 'md' ? '12px'
+        : theme.card_blur === undefined ? '4px' : '4px';
+
     const containerStyle = {
-        fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : (content?.font_family ? `"${content.font_family}", sans-serif` : 'inherit'),
-        '--primary-color': content?.accent_color || '#06b6d4',
-        '--btn-gradient-start': content?.theme_settings?.button_gradient_start || '#2563eb',
-        '--btn-gradient-end': content?.theme_settings?.button_gradient_end || '#06b6d4'
+        fontFamily: theme.font_body ? `"${theme.font_body}", sans-serif` : (theme.font_heading ? `"${theme.font_heading}", sans-serif` : 'inherit'),
+        color: isLight ? theme.text_color : undefined,
+        background: isLight ? theme.page_bg : undefined,
+        backgroundImage: isLight && theme.grid_bg ? 'radial-gradient(rgba(0,0,0,0.14) 1.2px, transparent 1.2px)' : undefined,
+        backgroundSize: isLight && theme.grid_bg ? '22px 22px' : undefined,
+        // CSS variables consumed by themes.css + inline styles below
+        '--primary-color': accent,
+        '--theme-heading': theme.heading_color || '#fff',
+        '--theme-muted': theme.muted_color || '#9ca3af',
+        '--theme-ink': theme.card_border_color || '#111',
+        '--theme-card-border': theme.card_border_color || 'rgba(255,255,255,0.1)',
+        '--btn-gradient-start': theme.button_gradient_start || '#2563eb',
+        '--btn-gradient-end': theme.button_gradient_end || '#06b6d4',
     };
 
-    // Helper for Card Styles
+    // Card style derived from the active theme (supports hard neobrutalist shadows).
     const cardStyle = {
-        backgroundColor: `rgba(255, 255, 255, ${content?.theme_settings?.card_bg_opacity || 0.05})`,
-        borderColor: content?.theme_settings?.card_border_color || 'rgba(255, 255, 255, 0.1)',
-        backdropFilter: `blur(${content?.theme_settings?.card_blur === 'none' ? '0' : (content?.theme_settings?.card_blur === 'xl' ? '24px' : (content?.theme_settings?.card_blur === 'md' ? '12px' : '4px'))})`
+        backgroundColor: theme.card_bg || `rgba(255, 255, 255, ${theme.card_bg_opacity ?? 0.05})`,
+        borderStyle: 'solid',
+        borderColor: theme.card_border_color || 'rgba(255, 255, 255, 0.1)',
+        borderWidth: theme.card_border_width || '1px',
+        boxShadow: theme.card_shadow && theme.card_shadow !== 'none' ? theme.card_shadow : undefined,
+        backdropFilter: `blur(${blurValue})`,
     };
+    const cardRadius = theme.card_radius ?? '1rem';
+
+    // Primary button: gradient (dark themes) or solid+hard-border (retro/flat themes).
+    const primaryBtnStyle = theme.button_solid
+        ? { background: theme.button_solid, color: theme.button_text || '#111', border: `3px solid ${theme.card_border_color || '#111'}`, boxShadow: `5px 5px 0 ${theme.card_border_color || '#111'}` }
+        : { background: `linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end))`, color: '#fff' };
+    const secondaryBtnStyle = theme.button_solid
+        ? { background: 'transparent', color: theme.heading_color || '#111', border: `3px solid ${theme.card_border_color || '#111'}`, boxShadow: `5px 5px 0 ${theme.card_border_color || '#111'}` }
+        : {};
 
     // Helper for Section Styles
     const getSectionStyle = (sectionKey) => {
@@ -137,19 +170,20 @@ const LandingPage = () => {
     };
 
     return (
-        <div style={containerStyle} className="relative min-h-screen text-white overflow-x-hidden selection:bg-[var(--primary-color)]/30">
-            {content?.theme_settings?.font_heading && (
-                <link rel="stylesheet" href={fontToUrl(content.theme_settings.font_heading)} />
+        <div style={containerStyle} data-theme={content?.active_theme || 'retro'} data-theme-mode={isLight ? 'light' : 'dark'} className="relative min-h-screen text-white overflow-x-hidden selection:bg-[var(--primary-color)]/30">
+            {theme.font_heading && (
+                <link rel="stylesheet" href={fontToUrl(theme.font_heading)} />
             )}
-            {content?.theme_settings?.font_body && content.theme_settings.font_body !== content.theme_settings.font_heading && (
-                <link rel="stylesheet" href={fontToUrl(content.theme_settings.font_body)} />
+            {theme.font_body && theme.font_body !== theme.font_heading && (
+                <link rel="stylesheet" href={fontToUrl(theme.font_body)} />
             )}
             {/* Load custom section fonts if any */}
             {content?.theme_settings?.sections && Object.values(content.theme_settings.sections).map((s, i) => (
                 s.enabled && s.fontFamily && <link key={i} rel="stylesheet" href={fontToUrl(s.fontFamily)} />
             ))}
 
-            <DynamicBackground style={content?.background_style} />
+            {/* Animated background only for dark themes; light themes use page_bg + grid */}
+            {!isLight && <DynamicBackground style={content?.background_style} />}
             <Navbar />
 
             {/* Hero Section */}
@@ -191,8 +225,8 @@ const LandingPage = () => {
 
                     <div className="flex flex-wrap justify-center gap-5">
                         <a href={content?.hero_button_primary_link || "#ecosystem"}>
-                            <button className={`group relative px-8 py-4 font-bold text-lg hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(6,182,212,0.5)] overflow-hidden text-white ${content?.theme_settings?.button_style || 'rounded-full'}`}
-                                style={{ background: `linear-gradient(to right, var(--btn-gradient-start), var(--btn-gradient-end))` }}>
+                            <button className={`btn-themed-primary group relative px-8 py-4 font-bold text-lg overflow-hidden ${theme.button_solid ? '' : 'hover:scale-105 transition-transform duration-300 shadow-[0_0_20px_rgba(6,182,212,0.5)]'} ${theme.button_style || 'rounded-full'}`}
+                                style={primaryBtnStyle}>
                                 <span className="relative z-10 flex items-center gap-2">
                                     {content?.hero_button_primary_text || "Explore Ecosystem"}
                                     <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -200,7 +234,8 @@ const LandingPage = () => {
                             </button>
                         </a>
                         <a href={content?.hero_button_secondary_link || "#"}>
-                            <button className={`px-8 py-4 border border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300 font-medium text-lg flex items-center gap-2 ${content?.theme_settings?.button_style || 'rounded-full'}`}>
+                            <button className={`btn-themed-secondary px-8 py-4 font-medium text-lg flex items-center gap-2 ${theme.button_solid ? '' : 'border border-white/20 bg-white/5 backdrop-blur-sm hover:bg-white/10 transition-all duration-300'} ${theme.button_style || 'rounded-full'}`}
+                                style={secondaryBtnStyle}>
                                 <Play className="w-4 h-4 fill-current" />
                                 {content?.hero_button_secondary_text || "Tonton Video"}
                             </button>
@@ -236,8 +271,8 @@ const LandingPage = () => {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {(products.length > 0 ? products : productFallback).map((product) => (
-                            <div key={product.id} className={`group relative overflow-hidden transition-all duration-500 flex flex-col md:flex-row border`}
-                                style={{ ...cardStyle, borderRadius: '1.5rem' }}>
+                            <div key={product.id} className={`themed-card group relative overflow-hidden transition-all duration-500 flex flex-col md:flex-row`}
+                                style={{ ...cardStyle, borderRadius: cardRadius }}>
                                 {product.tag && (
                                     <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/10">
                                         {product.tag}
@@ -317,8 +352,8 @@ const LandingPage = () => {
                                 <motion.div
                                     key={feature.id || idx}
                                     whileHover={{ y: -5 }}
-                                    className="p-6 border transition-all duration-300 group hover:border-blue-500/30"
-                                    style={{ ...cardStyle, borderRadius: '1rem' }}
+                                    className="themed-card p-6 transition-all duration-300 group"
+                                    style={{ ...cardStyle, borderRadius: cardRadius }}
                                 >
                                     <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-500/20 to-cyan-600/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                                         <IconComponent className="text-cyan-400 w-6 h-6" />

@@ -73,42 +73,44 @@ const LandingPageContent = sequelize.define('LandingPageContent', {
     },
     background_style: {
         type: DataTypes.STRING,
-        defaultValue: 'galaxy'
+        defaultValue: 'none' // retro theme uses page_bg + dotted grid, no animated background
     },
     active_theme: {
         type: DataTypes.STRING,
-        defaultValue: 'modern_tech'
+        defaultValue: 'retro'
     },
     font_family: {
         type: DataTypes.STRING,
-        defaultValue: 'Inter'
+        defaultValue: 'Space Grotesk'
     },
     accent_color: {
         type: DataTypes.STRING,
-        defaultValue: '#06b6d4' // Cyan-500
+        defaultValue: '#ffd800' // retro yellow
     },
     theme_settings: {
         type: DataTypes.JSON,
+        // Default = Retro / Neobrutalist. Mirrors THEMES.retro in
+        // frontend/src/lib/themes.js — keep the two in sync.
         defaultValue: {
-            // Global
-            font_heading: 'Outfit',
-            font_body: 'Inter',
-
-            // Buttons
-            button_style: 'rounded-xl', // rounded-md, rounded-full, rounded-none
-            button_gradient_start: '#3b82f6', // blue-500
-            button_gradient_end: '#8b5cf6',   // violet-500
-
-            // Cards (Features, Products)
-            card_bg_opacity: 0.08,
-            card_border_color: 'rgba(255,255,255,0.1)',
-            card_blur: 'xl', // none, sm, md, lg, xl
-
-            // Sections
-            section_hero_bg: 'transparent',
-            section_ecosystem_bg: 'rgba(0,0,0,0.2)',
-            section_features_bg: 'transparent',
-            section_stats_bg: 'linear-gradient(to right, rgba(30,58,138,0.2), rgba(21,94,117,0.2))'
+            mode: 'light',
+            font_heading: 'Space Grotesk',
+            font_body: 'Space Grotesk',
+            accent: '#ffd800',
+            page_bg: '#fdf6e3',
+            grid_bg: true,
+            text_color: '#1a1a1a',
+            heading_color: '#111111',
+            muted_color: '#4b4b4b',
+            button_style: 'rounded-none',
+            button_solid: '#ffd800',
+            button_text: '#111111',
+            card_bg: '#ffffff',
+            card_border_color: '#111111',
+            card_border_width: '3px',
+            card_shadow: '6px 6px 0 #111111',
+            card_radius: '0px',
+            card_blur: 'none',
+            uppercase_headings: true
         }
     }
 });

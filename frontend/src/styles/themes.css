@@ -1,0 +1,71 @@
+/* Theme overrides driven by data-theme / data-theme-mode on the landing root.
+   The landing markup is built dark-first (text-white, gray text, glass panels),
+   so light themes need to flip those base utilities. Scoped to [data-theme-mode]
+   so the admin panel and other pages are untouched. */
+
+/* ---- LIGHT MODE: flip dark-first text + neutralize dark glass ---- */
+[data-theme-mode="light"] .text-white { color: var(--theme-heading, #111) !important; }
+[data-theme-mode="light"] .text-gray-200,
+[data-theme-mode="light"] .text-gray-300,
+[data-theme-mode="light"] .text-gray-400,
+[data-theme-mode="light"] .text-gray-500 { color: var(--theme-muted, #4b4b4b) !important; }
+
+/* Dark translucent panels become transparent so the light page shows through */
+[data-theme-mode="light"] .bg-black\/20,
+[data-theme-mode="light"] .bg-black\/40,
+[data-theme-mode="light"] .bg-white\/5 { background-color: transparent !important; }
+
+/* Dark section gradients (stats / teaser) -> soft accent tint on light */
+[data-theme-mode="light"] .from-blue-900\/20,
+[data-theme-mode="light"] .to-cyan-900\/20,
+[data-theme-mode="light"] .from-blue-900\/40,
+[data-theme-mode="light"] .to-cyan-900\/40 { --tw-gradient-from: transparent !important; --tw-gradient-to: transparent !important; }
+[data-theme-mode="light"] .border-white\/5,
+[data-theme-mode="light"] .border-white\/10,
+[data-theme-mode="light"] .border-white\/20 { border-color: var(--theme-card-border, rgba(0,0,0,0.15)) !important; }
+
+/* ---- RETRO / NEOBRUTALIST specifics ---- */
+[data-theme="retro"] {
+    --tw-shadow: 0 0 #0000;
+}
+[data-theme="retro"] h1,
+[data-theme="retro"] h2,
+[data-theme="retro"] h3 {
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    color: var(--theme-heading, #111);
+}
+/* Kill gradient-clip text so headings are solid ink in retro */
+[data-theme="retro"] .bg-clip-text {
+    -webkit-text-fill-color: var(--theme-heading, #111) !important;
+    color: var(--theme-heading, #111) !important;
+    background: none !important;
+}
+/* Retro hero badge -> flat chip with hard border */
+[data-theme="retro"] .backdrop-blur-md { backdrop-filter: none !important; }
+
+/* Themed primary/secondary buttons (retro press-down effect) */
+.btn-themed-primary,
+.btn-themed-secondary {
+    transition: transform .08s ease, box-shadow .08s ease, background-color .2s ease;
+}
+[data-theme="retro"] .btn-themed-primary,
+[data-theme="retro"] .btn-themed-secondary {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+[data-theme="retro"] .btn-themed-primary:hover,
+[data-theme="retro"] .btn-themed-secondary:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 3px 3px 0 var(--theme-ink, #111) !important;
+}
+[data-theme="retro"] .btn-themed-primary:active,
+[data-theme="retro"] .btn-themed-secondary:active {
+    transform: translate(5px, 5px);
+    box-shadow: 0 0 0 var(--theme-ink, #111) !important;
+}
+
+/* Themed cards get a subtle lift on hover when they carry a hard shadow */
+.themed-card { transition: transform .12s ease, box-shadow .12s ease; }
+[data-theme="retro"] .themed-card:hover { transform: translate(-2px, -2px); box-shadow: 8px 8px 0 var(--theme-ink, #111) !important; }
