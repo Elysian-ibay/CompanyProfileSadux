@@ -9,15 +9,23 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
-app.use(cors());
+// CORS: restrict to allowed origins in production (comma-separated CLIENT_ORIGIN),
+// allow all when not configured (local dev).
+const allowedOrigins = process.env.CLIENT_ORIGIN
+    ? process.env.CLIENT_ORIGIN.split(',').map((o) => o.trim())
+    : null;
+
+app.use(cors({
+    origin: allowedOrigins || '*',
+    credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Static Folder for Uploads
+// Static Folder for Uploads (legacy / local only — production uploads use Supabase Storage)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// Routes
+// Health check / root
 app.get('/', (req, res) => {
     res.send('API SaduX Company Profile is running...');
 });
@@ -43,15 +51,22 @@ app.use('/api/cms', require('./routes/cmsRoutes'));
 // User routes disabled as per request
 // app.use('/api/users', require('./routes/userRoutes'));
 
-// Database Sync & Server Start
-const dbSyncOptions = process.env.NODE_ENV === 'production' ? { force: false } : { alter: true }; // Use alter in dev to update columns
-db.sequelize.sync(dbSyncOptions) // Set force: true to drop and re-create tables (dev only)
-    .then(() => {
-        console.log('Database connected and synced');
-        app.listen(PORT, () => {
-            console.log(`Server running on http://localhost:${PORT}`);
+// On Vercel (serverless) we DON'T call app.listen() or auto-sync the schema —
+// the function is invoked per-request and the DB is migrated separately
+// (`npm run db:migrate`). We only start a long-running server for local dev.
+if (!process.env.VERCEL) {
+    const dbSyncOptions = process.env.NODE_ENV === 'production' ? { force: false } : { alter: true };
+    db.sequelize.sync(dbSyncOptions)
+        .then(() => {
+            console.log('Database connected and synced');
+            app.listen(PORT, () => {
+                console.log(`Server running on http://localhost:${PORT}`);
+            });
+        })
+        .catch((err) => {
+            console.error('Failed to sync database:', err);
         });
-    })
-    .catch((err) => {
-        console.error('Failed to sync database:', err);
-    });
+}
+
+// Export the Express app so Vercel's @vercel/node builder can use it as the handler.
+module.exports = app;

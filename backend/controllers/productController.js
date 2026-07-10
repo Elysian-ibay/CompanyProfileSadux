@@ -1,5 +1,6 @@
 const db = require('../models');
 const Product = db.Product;
+const { uploadFile } = require('../utils/storage');
 
 // Get all products
 exports.getAllProducts = async (req, res) => {
@@ -18,7 +19,7 @@ exports.createProduct = async (req, res) => {
         let imagePath = null;
 
         if (req.file) {
-            imagePath = `/uploads/${req.file.filename}`; // Save relative path
+            imagePath = await uploadFile(req.file, 'products'); // Supabase public URL
         }
 
         const product = await Product.create({
@@ -50,7 +51,7 @@ exports.updateProduct = async (req, res) => {
 
         let imagePath = product.image;
         if (req.file) {
-            imagePath = `/uploads/${req.file.filename}`;
+            imagePath = await uploadFile(req.file, 'products'); // Supabase public URL
         }
 
         await product.update({

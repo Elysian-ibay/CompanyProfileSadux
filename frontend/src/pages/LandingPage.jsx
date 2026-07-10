@@ -5,7 +5,7 @@ import DynamicBackground from '../components/DynamicBackground';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Trophy, Users, ShoppingBag, Globe, Sparkles, MessageCircle, ArrowRight, Play, CheckCircle2, HelpCircle, Briefcase, Zap, ShieldCheck, Activity, Star } from 'lucide-react';
-import api, { SERVER_URL } from '../lib/api';
+import api, { imageUrl } from '../lib/api';
 
 // Product data placeholder (Fallback jika API tidak tersedia)
 const productFallback = [
@@ -245,7 +245,7 @@ const LandingPage = () => {
                                 )}
                                 <div className={`aspect-video md:w-1/2 relative overflow-hidden bg-gray-900 group`}>
                                     {product.image ? (
-                                        <img src={`${SERVER_URL}${product.image}`} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                        <img src={imageUrl(product.image)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
                                     ) : (
                                         <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
                                             <span className="text-4xl opacity-50">⚡</span>

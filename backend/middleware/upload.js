@@ -1,13 +1,9 @@
 const multer = require('multer');
 const path = require('path');
 
-// Set storage engine
-const storage = multer.diskStorage({
-    destination: './uploads/',
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
+// Memory storage: files are kept in RAM (req.file.buffer) then streamed to
+// Supabase Storage. This is required for Vercel serverless (read-only filesystem).
+const storage = multer.memoryStorage();
 
 // Init upload
 const upload = multer({
