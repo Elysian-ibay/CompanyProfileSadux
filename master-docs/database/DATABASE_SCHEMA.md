@@ -2,6 +2,11 @@
 
 > Dokumentasi lengkap semua tabel database. Sequelize auto-generate `id`, `createdAt`, `updatedAt` pada setiap tabel.
 
+> **UPDATE (2026-07-10):**
+> - **Engine:** production sekarang **PostgreSQL (Supabase)**, bukan MySQL. Struktur tabel sama (Sequelize portable). Lokal masih bisa MySQL/XAMPP via `DB_DIALECT=mysql`.
+> - **Tema default:** `LandingPageContents.active_theme` = **`retro`**, `background_style` = `none`, `accent_color` = `#ffd800`, `theme_settings` = konfigurasi retro (lihat `backend/models/LandingPageContent.js` & `frontend/src/lib/themes.js`).
+> - **Auth:** kolom "Auth: Yes" di tabel API di bawah kini **benar-benar ditegakkan** (JWT admin via `backend/middleware/auth.js`).
+
 ---
 
 ## ERD Overview

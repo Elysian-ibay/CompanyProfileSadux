@@ -4,6 +4,48 @@
 
 ---
 
+## [v3.0.0] - Production Deploy, Auth, & Theme System (2026-07-10)
+
+> Aplikasi kini **LIVE** di Vercel + Supabase. Ringkasan serah-terima: `handoff/HANDOFF.md`.
+
+### Added - Deployment (Vercel + Supabase)
+
+- **Database MySQL → Supabase PostgreSQL**
+  - `backend/config/database.js`: dialect env-driven (`DB_DIALECT`, default `postgres`), SSL otomatis, dukung `DATABASE_URL` (URI pooler) atau `DB_*` terpisah, pool kecil (`DB_POOL_MAX`). MySQL lokal tetap didukung.
+  - Force-bundle driver `pg`/`pg-hstore` (fix `FUNCTION_INVOCATION_FAILED` — Sequelize load driver via dynamic require yang tak ter-bundle Vercel).
+  - `scripts/create-db.js`: skip `CREATE DATABASE` untuk non-mysql.
+- **Backend serverless di Vercel**
+  - `server.js`: export Express `app`, hanya `listen()`+`sync()` saat bukan Vercel; CORS via `CLIENT_ORIGIN` (di-normalize, toleran trailing slash).
+  - `backend/vercel.json`: route semua request ke `server.js` via `@vercel/node`.
+  - Deps: `pg`, `pg-hstore`, `@supabase/supabase-js`.
+- **Upload → Supabase Storage**
+  - `backend/config/supabase.js` (client service-role), `backend/utils/storage.js` (`uploadFile()`, auto-buat bucket public `uploads`, return public URL).
+  - `middleware/upload.js`: multer `memoryStorage()`. `productController`: simpan URL absolut.
+- **Frontend di Vercel**
+  - `frontend/vercel.json`: SPA rewrite (route seperti `/login/super-admin`, `/admin` tak 404).
+  - `imageUrl()` helper di `frontend/src/lib/api.js` (URL absolut Supabase dipakai apa adanya).
+  - `.env.production.example`. `VITE_API_URL` wajib berakhiran `/api`.
+
+### Added - Autentikasi (JWT enforced)
+
+- `backend/middleware/auth.js`: `verifyToken` + `isAdmin`. Diterapkan ke semua route mutasi (products/content/features/stats/cms POST-PUT-DELETE), `GET /analytics/dashboard`, dan `POST /auth/register` (kini admin-only). GET publik & tracking tetap terbuka.
+- Frontend: axios response interceptor → 401 clear sesi + redirect `/login/super-admin`.
+- **Catatan:** sebelumnya JWT dibuat saat login tapi TIDAK pernah diverifikasi (semua route mutasi terbuka).
+
+### Added - Sistem Tema (Retro default + switchable)
+
+- `frontend/src/lib/themes.js`: registry `THEMES` + `THEME_LIST` + `resolveThemeSettings()`. 6 tema: **retro (default)**, modern_tech, creative_studio, elegant_dark, neon_cyber, pastel_pop.
+- `frontend/src/styles/themes.css`: flip utility dark→light + spesifik retro (hard shadow, uppercase, press button).
+- `LandingPage.jsx`: theming via `data-theme`/CSS vars, `cardStyle`/tombol/`page_bg` dari tema, background animasi hanya tema gelap.
+- `ContentManager.jsx`: grid preset di-map dari `THEME_LIST`.
+- `backend/models/LandingPageContent.js`: default diubah ke retro (`active_theme='retro'`, `background_style='none'`, `accent_color='#ffd800'`, `theme_settings` retro).
+
+### Added - Dokumentasi
+
+- `deployment/VERCEL_SUPABASE_DEPLOY.md` (panduan deploy current), `handoff/HANDOFF.md` (serah-terima). `deployment/DEPLOYMENT_GUIDE.md` ditandai usang.
+
+---
+
 ## [v1.0.0] - Initial Release (Implementation Plan V1)
 
 ### Added - Backend

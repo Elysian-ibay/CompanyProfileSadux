@@ -2,6 +2,8 @@
 
 > Dokumen ini merangkum status implementasi dari **implementation_plan.md** (V1) dan **implementation_plan_v2.md** (V2) terhadap codebase aktual.
 
+> **STATUS (2026-07-10): LIVE di production.** Frontend & backend di **Vercel**, database & storage di **Supabase (PostgreSQL)**. Untuk gambaran menyeluruh & cara operasional, baca **`handoff/HANDOFF.md`**. Perubahan besar sejak dokumen ini ditulis: deploy Vercel+Supabase, JWT auth ditegakkan, sistem tema baru (default **Retro**, 6 tema switchable). Detail: `MASTER_CHANGELOG.md` v3.0.0.
+
 ---
 
 ## Project Overview
@@ -9,8 +11,9 @@
 | Item | Detail |
 |---|---|
 | **Project** | SaduX Company Profile - Full Dynamic Landing Page CMS |
-| **Stack** | React 19 + Vite 7 + TailwindCSS 4 (Frontend), Express 5 + Sequelize 6 + MySQL (Backend) |
-| **Database** | `sadux_companyprofile_db-development` (XAMPP MySQL) |
+| **Stack** | React 19 + Vite 7 + TailwindCSS 4 (Frontend), Express 5 + Sequelize 6 (Backend) |
+| **Database** | Production: **Supabase PostgreSQL** (pooler :6543). Lokal opsional: XAMPP MySQL (`DB_DIALECT=mysql`) |
+| **Hosting** | Vercel (FE + BE, 2 project 1 repo) — LIVE. Lihat `handoff/HANDOFF.md` |
 | **API Base** | Dikonfigurasi via `VITE_API_URL` (frontend `.env`) dan `PORT` (backend `.env`) |
 | **Frontend Port** | 5203 (dev) |
 | **Backend Port** | 5202 (dev) |
