@@ -15,6 +15,8 @@ const Products = () => {
     const [formData, setFormData] = useState({
         name: '',
         price: '',
+        price_monthly: '',
+        price_yearly: '',
         description: '',
         tag: '',
         link: '',
@@ -73,6 +75,8 @@ const Products = () => {
         setFormData({
             name: product.name,
             price: product.price,
+            price_monthly: product.price_monthly || '',
+            price_yearly: product.price_yearly || '',
             description: product.description,
             tag: product.tag,
             link: product.link,
@@ -87,7 +91,7 @@ const Products = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingId(null);
-        setFormData({ name: '', price: '', description: '', tag: '', link: '', image: null });
+        setFormData({ name: '', price: '', price_monthly: '', price_yearly: '', description: '', tag: '', link: '', image: null });
     };
 
     const handleInputChange = (e) => {
@@ -106,6 +110,8 @@ const Products = () => {
             const data = new FormData();
             data.append('name', formData.name);
             data.append('price', formData.price);
+            data.append('price_monthly', formData.price_monthly || '');
+            data.append('price_yearly', formData.price_yearly || '');
             data.append('description', formData.description);
             data.append('tag', formData.tag);
             data.append('link', formData.link);
@@ -211,7 +217,13 @@ const Products = () => {
                                     </button>
                                 </div>
                             </div>
-                            <p className="text-cyan-400 font-bold mb-2">{product.price}</p>
+                            <p className="text-cyan-400 font-bold mb-1">{product.price}</p>
+                            {(product.price_monthly || product.price_yearly) && (
+                                <div className="text-xs text-gray-400 mb-2 space-y-0.5">
+                                    {product.price_monthly && <div>{product.price_monthly} <span className="text-gray-600">/bln</span></div>}
+                                    {product.price_yearly && <div>{product.price_yearly} <span className="text-gray-600">/thn</span></div>}
+                                </div>
+                            )}
                             <div className="flex justify-between items-center text-xs text-gray-400 mb-2">
                                 {product.link && <a href={product.link} target="_blank" rel="noreferrer" className="text-blue-400 hover:underline">{product.link}</a>}
 
@@ -247,13 +259,37 @@ const Products = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Price (Rp)</label>
+                                    <label className="block text-sm text-gray-400 mb-1">Label Harga / Tier</label>
                                     <input
                                         name="price"
                                         value={formData.price}
                                         onChange={handleInputChange}
+                                        placeholder="e.g. FREE, Subscription"
                                         className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
                                         required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Harga / Bulan</label>
+                                    <input
+                                        name="price_monthly"
+                                        value={formData.price_monthly}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. Rp 150.000"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-sm text-gray-400 mb-1">Harga / Tahun</label>
+                                    <input
+                                        name="price_yearly"
+                                        value={formData.price_yearly}
+                                        onChange={handleInputChange}
+                                        placeholder="e.g. Rp 1.500.000"
+                                        className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
                                     />
                                 </div>
                             </div>

@@ -309,8 +309,16 @@ const LandingPage = () => {
                                     <h3 className="text-2xl font-bold mb-2 text-white" style={{ fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit' }}>{product.name}</h3>
                                     <p className="text-gray-400 mb-6 text-sm flex-grow">{product.description}</p>
 
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-cyan-400 font-medium">{product.price}</span>
+                                    <div className="flex items-center justify-between gap-4">
+                                        <div>
+                                            <span className="font-medium" style={{ color: accent }}>{product.price}</span>
+                                            {(product.price_monthly || product.price_yearly) && (
+                                                <div className="mt-1 text-sm text-gray-400 space-y-0.5" style={{ color: isLight ? theme.muted_color : undefined }}>
+                                                    {product.price_monthly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span> / bulan</div>}
+                                                    {product.price_yearly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_yearly}</span> / tahun</div>}
+                                                </div>
+                                            )}
+                                        </div>
                                         {product.link && (
                                             <a
                                                 href={product.link}

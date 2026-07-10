@@ -7,8 +7,16 @@ const Product = sequelize.define('Product', {
         allowNull: false
     },
     price: {
-        type: DataTypes.STRING, // Store as string for flexibility "Rp 150.000" or DECIMAL if calc needed
+        type: DataTypes.STRING, // Label/tier price, e.g. "FREE", "Subscription"
         allowNull: false
+    },
+    price_monthly: {
+        type: DataTypes.STRING, // e.g. "Rp 150.000" (per bulan) — optional
+        allowNull: true
+    },
+    price_yearly: {
+        type: DataTypes.STRING, // e.g. "Rp 1.500.000" (per tahun) — optional
+        allowNull: true
     },
     description: {
         type: DataTypes.TEXT,
