@@ -1,7 +1,7 @@
 # 🚀 Handoff — SaduX Company Profile CMS
 
 > Dokumen serah-terima. Status: **LIVE di production** (Vercel + Supabase). Landing page + admin CMS berjalan penuh.
-> Terakhir diperbarui: 2026-07-10.
+> Terakhir diperbarui: 2026-07-10 (mencakup s/d v3.3.0).
 
 ---
 
@@ -142,6 +142,7 @@ Pakai MySQL lokal (XAMPP): set `DB_DIALECT=mysql`, kosongkan `DATABASE_URL`, isi
 - **9 tabel:** Users, Products, LandingPageContents (singleton, isi semua konten + `theme_settings`), Features, Statistics, Testimonials, Faqs, GeneralSettings (singleton), Visitors.
 - **Schema lengkap:** [`../database/DATABASE_SCHEMA.md`](../database/DATABASE_SCHEMA.md).
 - **Migrate/seed** dijalankan dari lokal (bukan di Vercel). Sudah dilakukan → DB production sudah terisi.
+- **⚠️ Migrasi kolom pasca-rilis** ditambahkan lewat **SQL manual di Supabase** (Vercel tidak auto-sync schema). Semua statement `ALTER ... IF NOT EXISTS` terkumpul di bagian **"Migrasi Manual (Post-Release)"** pada `DATABASE_SCHEMA.md`. **Setiap kali menambah kolom/model baru**, jalankan `npm run db:migrate` dari lokal (mengubah Supabase) ATAU paste SQL-nya di Supabase.
 - **Verifikasi:** Supabase → Table Editor.
 - **Backup/restore lokal:** `npm run db:backup` / `npm run db:restore` (JSON di `backend/backups/`).
 
@@ -157,7 +158,7 @@ Pakai MySQL lokal (XAMPP): set `DB_DIALECT=mysql`, kosongkan `DATABASE_URL`, isi
 
 ## 11. Sistem Tema
 
-- **Default: Retro / Neobrutalist** (krem + grid titik, border tebal, hard shadow, kuning, uppercase).
+- **Default: Retro / Neobrutalist** (krem + grid titik, border tebal, hard shadow, kuning, uppercase). Termasuk navbar mobile bergaya neobrutalist & flip warna otomatis untuk tema terang.
 - **6 tema** bisa diganti via **Admin → Content → Appearance → Preset Themes**: Retro, Modern Tech, Creative Studio, Elegant Dark, Neon Cyberpunk, Pastel Pop.
 - **Registry terpusat:** `frontend/src/lib/themes.js` — tambah tema baru = tambah 1 entry di `THEMES` + `THEME_LIST`.
 - **Default backend** ada di `backend/models/LandingPageContent.js` (harus sinkron dengan `THEMES.retro`).
@@ -182,8 +183,15 @@ Pakai MySQL lokal (XAMPP): set `DB_DIALECT=mysql`, kosongkan `DATABASE_URL`, isi
 5. **Frontend Vercel:** SPA rewrite, `imageUrl()` helper untuk URL absolut.
 6. **Perbaikan deploy:** force-bundle driver `pg` (fix `FUNCTION_INVOCATION_FAILED`), CORS di-normalize (trailing slash), `VITE_API_URL` harus `/api`.
 7. **Dokumentasi:** panduan deploy Vercel+Supabase, changelog, schema, handoff ini.
+8. **Ganti password admin** dari panel (menu profil → Ganti Password). Endpoint `POST /auth/change-password`.
+9. **Urutan produk drag-and-drop** di admin (`Products.order`, `PUT /products/reorder`).
+10. **Hero badge editable** via CMS (`hero_badge_text`) + readable di retro.
+11. **Branding:** upload **logo & favicon** (Supabase Storage), tampil di navbar/footer + tab browser. Logo + wordmark tampil bersamaan.
+12. **Harga per-bulan & per-tahun** produk (`price_monthly`, `price_yearly`).
+13. **Footer sepenuhnya editable** via CMS (tab Footer): deskripsi, kolom link, sosial media, powered-by.
+14. **Navbar mobile** ikut tema + gaya neobrutalist untuk retro.
 
-Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md).
+Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md) (s/d v3.3.0).
 
 ---
 
@@ -191,10 +199,10 @@ Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md).
 
 | Prioritas | Item |
 |---|---|
-| 🔴 Tinggi | **Ganti password admin default** (`admin/admin123`). Sekarang **sudah ada UI**: Admin → menu profil (kanan atas) → **Ganti Password**. Segera ganti. |
+| 🔴 Tinggi | **Ganti password admin default** (`admin/admin123`). Sudah ada UI: Admin → menu profil → **Ganti Password**. Segera ganti. |
 | 🟡 Sedang | `backend/.env-dev` masih ter-track di git (berisi JWT dev lemah) — sebaiknya `git rm --cached backend/.env-dev`. |
-| 🟡 Sedang | Navbar & Footer masih hardcoded (belum konsumsi `GeneralSetting`). |
-| 🟢 Rendah | Upload foto testimonial & teaser image belum ada UI (produk sudah bisa upload). |
+| 🟢 Rendah | **Footer** kini editable via CMS ✅. **Navbar** link menu (Home/Ecosystem/About/Contact) & teks brand "SaduX" masih hardcoded — belum editable. |
+| 🟢 Rendah | Upload foto testimonial belum ada UI (produk & branding sudah bisa upload; teaser pakai `teaser_image` bila di-set). |
 | 🟢 Rendah | Bundle frontend >500KB — pertimbangkan code-splitting bila perlu. |
 
 ---

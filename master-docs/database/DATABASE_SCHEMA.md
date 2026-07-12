@@ -6,6 +6,44 @@
 > - **Engine:** production sekarang **PostgreSQL (Supabase)**, bukan MySQL. Struktur tabel sama (Sequelize portable). Lokal masih bisa MySQL/XAMPP via `DB_DIALECT=mysql`.
 > - **Tema default:** `LandingPageContents.active_theme` = **`retro`**, `background_style` = `none`, `accent_color` = `#ffd800`, `theme_settings` = konfigurasi retro (lihat `backend/models/LandingPageContent.js` & `frontend/src/lib/themes.js`).
 > - **Auth:** kolom "Auth: Yes" di tabel API di bawah kini **benar-benar ditegakkan** (JWT admin via `backend/middleware/auth.js`).
+> - **Kolom tambahan pasca-rilis** (ditambah via SQL manual di Supabase karena Vercel tidak auto-migrate) — lihat bagian **"Migrasi Manual (Post-Release)"** di bawah.
+
+---
+
+## Migrasi Manual (Post-Release)
+
+> Kolom-kolom ini ditambahkan setelah rilis awal. Di lokal cukup `npm run db:migrate`. Di production (Supabase) dijalankan lewat **SQL Editor** (Vercel tidak auto-sync schema). Semua idempotent (`IF NOT EXISTS`).
+
+```sql
+-- Produk: urutan drag-and-drop + harga bulanan/tahunan
+ALTER TABLE "Products"
+  ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS "price_monthly" VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS "price_yearly" VARCHAR(255);
+
+-- Hero badge editable
+ALTER TABLE "LandingPageContents"
+  ADD COLUMN IF NOT EXISTS "hero_badge_text" VARCHAR(255)
+  DEFAULT 'Premier Tech Ecosystem Management';
+
+-- Branding + footer editable
+ALTER TABLE "GeneralSettings"
+  ADD COLUMN IF NOT EXISTS "site_logo" VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS "site_favicon" VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS "footer_description" TEXT,
+  ADD COLUMN IF NOT EXISTS "footer_columns" JSONB,
+  ADD COLUMN IF NOT EXISTS "social_links" JSONB,
+  ADD COLUMN IF NOT EXISTS "footer_powered_by" VARCHAR(255),
+  ADD COLUMN IF NOT EXISTS "footer_powered_by_url" VARCHAR(255);
+```
+
+**Ringkasan kolom baru:**
+- `Products`: `order` (INT), `price_monthly` (STR), `price_yearly` (STR)
+- `LandingPageContents`: `hero_badge_text` (STR)
+- `GeneralSettings`: `site_logo`, `site_favicon`, `footer_description`, `footer_columns` (JSON), `social_links` (JSON), `footer_powered_by`, `footer_powered_by_url`
+
+> `footer_columns` = `[{ title, items: [{ label, url }] }]` · `social_links` = `[{ platform, url }]` (platform: instagram/twitter/facebook/linkedin/youtube/website).
+> - **Kolom tambahan pasca-rilis** (v3.1–v3.3): lihat bagian **"Migrasi Manual (Kolom Tambahan)"** di bawah — dijalankan via SQL manual di Supabase karena Vercel tidak auto-sync schema.
 
 ---
 
@@ -240,6 +278,7 @@ Visitors (analytics tracking)
 | PUT | `/api/products/:id` | Yes | Update product |
 | DELETE | `/api/products/:id` | Yes | Delete product |
 | POST | `/api/products/:id/click` | No | Track product click |
+| PUT | `/api/products/reorder` | Yes | Reorder products (body `{ ids: [...] }`) |
 | GET | `/api/features` | No | Get all features |
 | POST | `/api/features` | Yes | Create feature |
 | PUT | `/api/features/:id` | Yes | Update feature |
@@ -248,8 +287,10 @@ Visitors (analytics tracking)
 | POST | `/api/stats` | Yes | Create statistic |
 | PUT | `/api/stats/:id` | Yes | Update statistic |
 | DELETE | `/api/stats/:id` | Yes | Delete statistic |
-| GET | `/api/cms/settings` | No | Get general settings |
-| PUT | `/api/cms/settings` | Yes | Update general settings |
+| GET | `/api/cms/settings` | No | Get general settings (incl. logo, favicon, footer) |
+| PUT | `/api/cms/settings` | Yes | Update general settings (incl. footer_columns/social_links) |
+| POST | `/api/cms/logo` | Yes | Upload site logo (image ≤5MB) → Supabase Storage |
+| POST | `/api/cms/favicon` | Yes | Upload favicon (PNG ≤500KB) → Supabase Storage |
 | GET | `/api/cms/testimonials` | No | Get all testimonials |
 | POST | `/api/cms/testimonials` | Yes | Create testimonial |
 | PUT | `/api/cms/testimonials/:id` | Yes | Update testimonial |
@@ -261,4 +302,5 @@ Visitors (analytics tracking)
 | POST | `/api/analytics/visit` | No | Track page visit |
 | GET | `/api/analytics/dashboard` | Yes | Get analytics stats |
 | POST | `/api/auth/login` | No | Admin login |
-| POST | `/api/auth/register` | No | Admin register |
+| POST | `/api/auth/change-password` | Yes | Change own password |
+| POST | `/api/auth/register` | Yes | Register admin (kini admin-only) |

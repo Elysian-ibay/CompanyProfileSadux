@@ -4,6 +4,13 @@
 
 ---
 
+## [v3.3.0] - Dual pricing, editable footer, mobile menu polish (2026-07-10)
+
+- **Harga per-bulan & per-tahun** produk: kolom `Products.price_monthly` + `price_yearly`. Form admin (Label Harga + Harga/Bulan + Harga/Tahun), tampil di kartu admin & landing "Our Ecosystem". Opsional (kosong = tidak tampil).
+- **Footer sepenuhnya editable via CMS** (tab **Footer** baru): `GeneralSettings.footer_description`, `footer_columns` (JSON: kolom link + judul), `social_links` (JSON: platform + url), `footer_powered_by` (+`_url`). Footer render dari data ini + fallback default. Copyright & powered-by dinamis.
+- **Logo + wordmark "SaduX" tampil bersamaan** di navbar & footer (dulu saling menggantikan).
+- **Menu mobile ikut tema**: overlay `bg-black/90` dulu tak terbaca di tema terang → kini pakai `--theme-page-bg`. Ditambah gaya **neobrutalist** (kartu ink + hard shadow + hover accent) khusus tema retro.
+
 ## [v3.2.0] - Branding: logo & favicon upload (2026-07-10)
 
 - **Upload logo & favicon** via CMS (Admin → Content → Settings → Branding). Disimpan ke **Supabase Storage** (folder `branding`), URL di `GeneralSettings.site_logo` / `site_favicon`. Kolom baru → **butuh SQL manual**.
