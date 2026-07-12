@@ -30,6 +30,12 @@ const FeatureCard = ({ icon: Icon, title, desc }) => (
     </motion.div>
 );
 
+const setMeta = (id, attr, value) => {
+    if (!value) return;
+    const el = document.getElementById(id);
+    if (el) el.setAttribute(attr, value);
+};
+
 const LandingPage = () => {
     const [content, setContent] = React.useState(null);
     const [products, setProducts] = React.useState([]);
@@ -38,19 +44,21 @@ const LandingPage = () => {
     const [testimonials, setTestimonials] = React.useState([]);
     const [faqs, setFaqs] = React.useState([]);
     const [settings, setSettings] = React.useState({});
+    const [clients, setClients] = React.useState([]);
 
     React.useEffect(() => {
         const fetchData = async () => {
             try {
                 // Fetch All Data
-                const [contentRes, productRes, featureRes, statsRes, testiRes, faqRes, settingsRes] = await Promise.all([
+                const [contentRes, productRes, featureRes, statsRes, testiRes, faqRes, settingsRes, clientsRes] = await Promise.all([
                     api.get('/content'),
                     api.get('/products'),
                     api.get('/features'),
                     api.get('/stats'),
                     api.get('/cms/testimonials'),
                     api.get('/cms/faqs'),
-                    api.get('/cms/settings')
+                    api.get('/cms/settings'),
+                    api.get('/cms/clients')
                 ]);
 
                 if (contentRes.data) setContent(contentRes.data);
@@ -60,18 +68,31 @@ const LandingPage = () => {
                 setTestimonials(testiRes.data);
                 setFaqs(faqRes.data);
                 setSettings(settingsRes.data);
+                setClients(clientsRes.data || []);
 
-                if (settingsRes.data?.site_title) document.title = settingsRes.data.site_title;
-                if (settingsRes.data?.site_favicon) {
-                    let link = document.querySelector("link[rel~='icon']");
-                    if (!link) {
-                        link = document.createElement('link');
-                        link.rel = 'icon';
-                        document.head.appendChild(link);
-                    }
-                    link.type = 'image/png';
-                    link.href = settingsRes.data.site_favicon;
+                const s = settingsRes.data;
+                if (s?.site_title) {
+                    document.title = s.site_title;
+                    setMeta('og-title', 'content', s.site_title);
+                    setMeta('tw-title', 'content', s.site_title);
                 }
+                if (s?.site_favicon) {
+                    const link = document.getElementById('app-favicon') || (() => {
+                        const el = document.createElement('link');
+                        el.id = 'app-favicon';
+                        el.rel = 'icon';
+                        document.head.appendChild(el);
+                        return el;
+                    })();
+                    link.type = 'image/png';
+                    link.href = s.site_favicon;
+                    setMeta('og-image', 'content', s.site_favicon);
+                    setMeta('tw-image', 'content', s.site_favicon);
+                }
+                if (s?.site_name) {
+                    setMeta('og-site-name', 'content', s.site_name);
+                }
+                setMeta('og-url', 'content', window.location.href);
 
             } catch (error) {
                 console.error("Failed to fetch landing data", error);
@@ -313,7 +334,13 @@ const LandingPage = () => {
                                     <div className="flex items-center justify-between gap-4">
                                         <div>
                                             <span className="font-medium" style={{ color: accent }}>{product.price}</span>
-                                            {(product.price_monthly || product.price_yearly) && (
+                                            {product.pricing_type === 'one_time' && product.price_monthly && (
+                                                <div className="mt-1 text-sm text-gray-400" style={{ color: isLight ? theme.muted_color : undefined }}>
+                                                    <span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span>
+                                                    <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">Bayar Sekali</span>
+                                                </div>
+                                            )}
+                                            {product.pricing_type !== 'one_time' && (product.price_monthly || product.price_yearly) && (
                                                 <div className="mt-1 text-sm text-gray-400 space-y-0.5" style={{ color: isLight ? theme.muted_color : undefined }}>
                                                     {product.price_monthly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span> / bulan</div>}
                                                     {product.price_yearly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_yearly}</span> / tahun</div>}
@@ -404,6 +431,48 @@ const LandingPage = () => {
                                 <div className="text-gray-400" style={{ color: getSectionStyle('stats').color ? undefined : '' }}>{stat.label}</div>
                             </div>
                         ))}
+                    </div>
+                </section>
+            )}
+
+            {/* Clients / Pengguna SaduX Section */}
+            {clients.length > 0 && (
+                <section className="relative z-10 py-16 px-4 bg-black/10" style={getSectionStyle('clients')}>
+                    <div className="max-w-6xl mx-auto">
+                        <div className="text-center mb-10">
+                            <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: accent }}>Dipercaya Oleh</p>
+                            <h2 className={`${getTitleSizeClass('clients', 'text-2xl md:text-3xl')} font-bold`} style={{ color: isLight ? theme.heading_color : '#fff', ...getTitleStyle('clients') }}>
+                                Pengguna SaduX
+                            </h2>
+                        </div>
+                        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+                            {clients.map((client) => (
+                                <a
+                                    key={client.id}
+                                    href={client.website || '#'}
+                                    target={client.website ? '_blank' : '_self'}
+                                    rel="noopener noreferrer"
+                                    className="flex flex-col items-center gap-3 group transition-all duration-300 hover:scale-105"
+                                    title={client.name}
+                                >
+                                    {client.logo ? (
+                                        <img
+                                            src={imageUrl(client.logo)}
+                                            alt={client.name}
+                                            className="h-12 md:h-14 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 filter grayscale group-hover:grayscale-0"
+                                        />
+                                    ) : (
+                                        <div className="h-12 w-28 rounded-lg flex items-center justify-center text-xs font-bold uppercase tracking-wide opacity-60 group-hover:opacity-100 transition-opacity"
+                                            style={{ background: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.08)', color: isLight ? theme.heading_color : '#fff', border: `1px solid ${theme.card_border_color || 'rgba(255,255,255,0.1)'}` }}>
+                                            {client.name}
+                                        </div>
+                                    )}
+                                    <span className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors text-center max-w-[100px] leading-tight">
+                                        {client.name}
+                                    </span>
+                                </a>
+                            ))}
+                        </div>
                     </div>
                 </section>
             )}

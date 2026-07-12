@@ -15,6 +15,7 @@ const Products = () => {
     const [formData, setFormData] = useState({
         name: '',
         price: '',
+        pricing_type: 'monthly',
         price_monthly: '',
         price_yearly: '',
         description: '',
@@ -75,6 +76,7 @@ const Products = () => {
         setFormData({
             name: product.name,
             price: product.price,
+            pricing_type: product.pricing_type || 'monthly',
             price_monthly: product.price_monthly || '',
             price_yearly: product.price_yearly || '',
             description: product.description,
@@ -91,7 +93,7 @@ const Products = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingId(null);
-        setFormData({ name: '', price: '', price_monthly: '', price_yearly: '', description: '', tag: '', link: '', image: null });
+        setFormData({ name: '', price: '', pricing_type: 'monthly', price_monthly: '', price_yearly: '', description: '', tag: '', link: '', image: null });
     };
 
     const handleInputChange = (e) => {
@@ -110,6 +112,7 @@ const Products = () => {
             const data = new FormData();
             data.append('name', formData.name);
             data.append('price', formData.price);
+            data.append('pricing_type', formData.pricing_type || 'monthly');
             data.append('price_monthly', formData.price_monthly || '');
             data.append('price_yearly', formData.price_yearly || '');
             data.append('description', formData.description);
@@ -217,8 +220,23 @@ const Products = () => {
                                     </button>
                                 </div>
                             </div>
-                            <p className="text-cyan-400 font-bold mb-1">{product.price}</p>
-                            {(product.price_monthly || product.price_yearly) && (
+                            <div className="flex items-center gap-2 mb-1">
+                                <p className="text-cyan-400 font-bold">{product.price}</p>
+                                {product.pricing_type && (
+                                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium
+                                        ${product.pricing_type === 'one_time' ? 'bg-green-500/20 text-green-400' :
+                                          product.pricing_type === 'free' ? 'bg-blue-500/20 text-blue-400' :
+                                          'bg-white/10 text-gray-400'}`}>
+                                        {product.pricing_type === 'monthly' ? '/bln' :
+                                         product.pricing_type === 'yearly' ? '/thn' :
+                                         product.pricing_type === 'one_time' ? 'sekali beli' : 'gratis'}
+                                    </span>
+                                )}
+                            </div>
+                            {product.pricing_type === 'one_time' && product.price_monthly && (
+                                <div className="text-xs text-gray-400 mb-2">{product.price_monthly}</div>
+                            )}
+                            {product.pricing_type !== 'one_time' && (product.price_monthly || product.price_yearly) && (
                                 <div className="text-xs text-gray-400 mb-2 space-y-0.5">
                                     {product.price_monthly && <div>{product.price_monthly} <span className="text-gray-600">/bln</span></div>}
                                     {product.price_yearly && <div>{product.price_yearly} <span className="text-gray-600">/thn</span></div>}
@@ -237,7 +255,7 @@ const Products = () => {
             {/* Create Product Modal */}
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-lg p-6 relative">
+                    <div className="bg-[#1a1a1a] border border-white/10 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 relative">
                         <button
                             onClick={handleCloseModal}
                             className="absolute top-4 right-4 text-gray-500 hover:text-white"
@@ -271,28 +289,56 @@ const Products = () => {
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-1">Tipe Harga</label>
+                                <select
+                                    name="pricing_type"
+                                    value={formData.pricing_type}
+                                    onChange={handleInputChange}
+                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                                >
+                                    <option value="monthly">Per Bulan</option>
+                                    <option value="yearly">Per Tahun</option>
+                                    <option value="one_time">Sekali Beli (Putus)</option>
+                                    <option value="free">Gratis</option>
+                                </select>
+                            </div>
+
+                            {formData.pricing_type === 'one_time' ? (
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Harga / Bulan</label>
+                                    <label className="block text-sm text-gray-400 mb-1">Harga (Sekali Beli)</label>
                                     <input
                                         name="price_monthly"
                                         value={formData.price_monthly}
                                         onChange={handleInputChange}
-                                        placeholder="e.g. Rp 150.000"
+                                        placeholder="e.g. Rp 5.000.000"
                                         className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
                                     />
                                 </div>
-                                <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Harga / Tahun</label>
-                                    <input
-                                        name="price_yearly"
-                                        value={formData.price_yearly}
-                                        onChange={handleInputChange}
-                                        placeholder="e.g. Rp 1.500.000"
-                                        className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
-                                    />
+                            ) : formData.pricing_type !== 'free' ? (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Harga / Bulan</label>
+                                        <input
+                                            name="price_monthly"
+                                            value={formData.price_monthly}
+                                            onChange={handleInputChange}
+                                            placeholder="e.g. Rp 150.000"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm text-gray-400 mb-1">Harga / Tahun</label>
+                                        <input
+                                            name="price_yearly"
+                                            value={formData.price_yearly}
+                                            onChange={handleInputChange}
+                                            placeholder="e.g. Rp 1.500.000"
+                                            className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                                        />
+                                    </div>
                                 </div>
-                            </div>
+                            ) : null}
 
                             <div>
                                 <label className="block text-sm text-gray-400 mb-1">Tag (e.g. Best Seller)</label>

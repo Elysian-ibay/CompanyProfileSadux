@@ -20,7 +20,6 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="products" element={<Products />} />
           <Route path="content" element={<ContentManager />} />
-          {/* Add other admin pages here */}
         </Route>
       </Routes>
     </Router>

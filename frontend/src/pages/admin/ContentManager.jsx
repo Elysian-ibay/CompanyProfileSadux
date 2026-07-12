@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Save, Loader2, Plus, Trash2, GripVertical, MessageSquare, HelpCircle, Settings as SettingsIcon } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Save, Loader2, Plus, Trash2, GripVertical, MessageSquare, HelpCircle, Settings as SettingsIcon, Building2, Upload, X } from 'lucide-react';
 import api, { imageUrl } from '../../lib/api';
 import { THEME_LIST } from '../../lib/themes';
 
@@ -32,6 +32,10 @@ const ContentManager = () => {
     const [testimonials, setTestimonials] = useState([]);
     const [faqs, setFaqs] = useState([]);
     const [settings, setSettings] = useState({});
+    const [clients, setClients] = useState([]);
+    const [clientForm, setClientForm] = useState({ name: '', website: '' });
+    const [clientEditing, setClientEditing] = useState(null);
+    const [clientLogoUploading, setClientLogoUploading] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -39,13 +43,14 @@ const ContentManager = () => {
 
     const fetchData = async () => {
         try {
-            const [contentRes, featuresRes, statsRes, settingsRes, testiRes, faqRes] = await Promise.all([
+            const [contentRes, featuresRes, statsRes, settingsRes, testiRes, faqRes, clientsRes] = await Promise.all([
                 api.get('/content'),
                 api.get('/features'),
                 api.get('/stats'),
                 api.get('/cms/settings'),
                 api.get('/cms/testimonials'),
-                api.get('/cms/faqs')
+                api.get('/cms/faqs'),
+                api.get('/cms/clients')
             ]);
             setContent(contentRes.data);
             setFeatures(featuresRes.data);
@@ -53,8 +58,54 @@ const ContentManager = () => {
             setSettings(settingsRes.data);
             setTestimonials(testiRes.data);
             setFaqs(faqRes.data);
+            setClients(clientsRes.data || []);
         } catch (error) {
             console.error('Failed to fetch data', error);
+        }
+    };
+
+    // --- Clients Logic ---
+    const saveClient = async () => {
+        if (!clientForm.name.trim()) return alert('Nama klien wajib diisi');
+        setLoading(true);
+        try {
+            if (clientEditing) {
+                await api.put(`/cms/clients/${clientEditing}`, clientForm);
+            } else {
+                await api.post('/cms/clients', clientForm);
+            }
+            setClientForm({ name: '', website: '' });
+            setClientEditing(null);
+            fetchData();
+        } catch (e) {
+            alert('Gagal menyimpan klien');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const deleteClient = async (id) => {
+        if (!window.confirm('Hapus klien ini?')) return;
+        try {
+            await api.delete(`/cms/clients/${id}`);
+            fetchData();
+        } catch (e) {
+            alert('Gagal menghapus');
+        }
+    };
+
+    const uploadClientLogo = async (clientId, file) => {
+        if (!file) return;
+        setClientLogoUploading(clientId);
+        try {
+            const fd = new FormData();
+            fd.append('image', file);
+            await api.post(`/cms/clients/${clientId}/logo`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+            fetchData();
+        } catch (e) {
+            alert(e.response?.data?.message || 'Upload logo gagal');
+        } finally {
+            setClientLogoUploading(null);
         }
     };
 
@@ -382,6 +433,7 @@ const ContentManager = () => {
         { id: 'features', label: 'Features' },
         { id: 'stats', label: 'Stats' },
         { id: 'teaser', label: 'Teaser' },
+        { id: 'clients', label: 'Klien' },
         { id: 'testimonials', label: 'Testimonials' },
         { id: 'faq', label: 'FAQ' },
         { id: 'background', label: 'Backgrounds' },
@@ -391,25 +443,27 @@ const ContentManager = () => {
     ];
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8 pb-20">
-            <h2 className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
+        <div className="max-w-6xl mx-auto space-y-6 pb-20">
+            <h2 className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-500">
                 Landing Page Manager
             </h2>
 
-            {/* Tabs */}
-            <div className="flex flex-wrap gap-2 p-1 bg-white/5 rounded-xl border border-white/10 w-fit">
-                {tabs.map(tab => (
-                    <button
-                        key={tab.id}
-                        onClick={() => setActiveTab(tab.id)}
-                        className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.id
-                            ? 'bg-purple-600 text-white shadow-lg'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
-                            }`}
-                    >
-                        {tab.label}
-                    </button>
-                ))}
+            {/* Tabs — horizontal scroll on mobile */}
+            <div className="overflow-x-auto pb-1 -mx-1">
+                <div className="flex gap-1.5 p-1 bg-white/5 rounded-xl border border-white/10 w-max min-w-full">
+                    {tabs.map(tab => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={`px-3 md:px-4 py-2 rounded-lg text-xs md:text-sm font-medium transition-all whitespace-nowrap ${activeTab === tab.id
+                                ? 'bg-purple-600 text-white shadow-lg'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
+                        >
+                            {tab.label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             {/* Content Area */}
@@ -774,6 +828,99 @@ const ContentManager = () => {
                             {loading ? 'Saving...' : 'Save Teaser Section'}
                         </button>
                         {renderSectionStyler('teaser', 'Teaser Section')}
+                    </div>
+                )}
+
+                {/* CLIENTS TAB */}
+                {activeTab === 'clients' && (
+                    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="font-bold text-white flex items-center gap-2"><Building2 size={18} /> Pengguna SaduX</h3>
+                                <p className="text-sm text-gray-400 mt-1">Tambahkan logo & nama perusahaan klien yang ditampilkan di landing page.</p>
+                            </div>
+                        </div>
+
+                        {/* Add / Edit Form */}
+                        <div className="bg-black/30 border border-white/10 rounded-xl p-4 space-y-3">
+                            <h4 className="text-sm font-semibold text-gray-300">{clientEditing ? 'Edit Klien' : 'Tambah Klien Baru'}</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Nama Perusahaan *</label>
+                                    <input
+                                        value={clientForm.name}
+                                        onChange={e => setClientForm({ ...clientForm, name: e.target.value })}
+                                        placeholder="e.g. PT Maju Bersama"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                                <div>
+                                    <label className="block text-xs text-gray-500 mb-1">Website (opsional)</label>
+                                    <input
+                                        value={clientForm.website}
+                                        onChange={e => setClientForm({ ...clientForm, website: e.target.value })}
+                                        placeholder="https://perusahaan.com"
+                                        className="w-full bg-black/40 border border-white/10 rounded-lg p-2.5 text-sm focus:outline-none focus:border-purple-500"
+                                    />
+                                </div>
+                            </div>
+                            <div className="flex gap-2">
+                                <button onClick={saveClient} disabled={loading} className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50">
+                                    {loading ? 'Menyimpan...' : (clientEditing ? 'Simpan Perubahan' : 'Tambah Klien')}
+                                </button>
+                                {clientEditing && (
+                                    <button onClick={() => { setClientEditing(null); setClientForm({ name: '', website: '' }); }}
+                                        className="px-4 py-2 bg-white/10 hover:bg-white/20 text-gray-300 rounded-lg text-sm font-medium transition-colors">
+                                        Batal
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Client List */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                            {clients.length === 0 ? (
+                                <div className="col-span-full text-center py-12 text-gray-500">
+                                    <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
+                                    <p>Belum ada klien. Tambahkan klien pertama di atas.</p>
+                                </div>
+                            ) : clients.map(client => (
+                                <div key={client.id} className="bg-black/20 border border-white/10 rounded-xl p-4 flex flex-col gap-3">
+                                    {/* Logo preview + upload */}
+                                    <div className="flex items-center gap-3">
+                                        {client.logo ? (
+                                            <img src={imageUrl(client.logo)} alt={client.name} className="h-12 w-24 object-contain rounded bg-white/10 p-1 shrink-0" />
+                                        ) : (
+                                            <div className="h-12 w-24 rounded bg-white/10 flex items-center justify-center text-gray-600 text-xs shrink-0">No Logo</div>
+                                        )}
+                                        <label className="flex-1 cursor-pointer">
+                                            <span className="flex items-center gap-1.5 text-xs text-purple-400 hover:text-purple-300 transition-colors">
+                                                <Upload size={12} /> {clientLogoUploading === client.id ? 'Mengupload...' : 'Upload Logo'}
+                                            </span>
+                                            <input type="file" accept="image/*" className="hidden"
+                                                onChange={e => uploadClientLogo(client.id, e.target.files[0])}
+                                                disabled={clientLogoUploading === client.id} />
+                                        </label>
+                                    </div>
+
+                                    <div>
+                                        <p className="font-semibold text-white text-sm">{client.name}</p>
+                                        {client.website && <a href={client.website} target="_blank" rel="noreferrer" className="text-xs text-blue-400 hover:underline truncate block">{client.website}</a>}
+                                    </div>
+
+                                    <div className="flex gap-2 mt-auto">
+                                        <button onClick={() => { setClientEditing(client.id); setClientForm({ name: client.name, website: client.website || '' }); }}
+                                            className="flex-1 py-1.5 text-xs bg-white/10 hover:bg-white/20 rounded-lg text-gray-300 transition-colors">
+                                            Edit
+                                        </button>
+                                        <button onClick={() => deleteClient(client.id)}
+                                            className="py-1.5 px-3 text-xs bg-red-500/10 hover:bg-red-500/20 rounded-lg text-red-400 transition-colors">
+                                            <Trash2 size={12} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 )}
 

@@ -41,6 +41,10 @@ const Product = sequelize.define('Product', {
     order: {
         type: DataTypes.INTEGER,
         defaultValue: 0 // display order (ASC) — set via drag-and-drop in admin
+    },
+    pricing_type: {
+        type: DataTypes.STRING,
+        defaultValue: 'monthly' // monthly | yearly | one_time | free
     }
 });
 

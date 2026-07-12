@@ -39,4 +39,11 @@ router.post('/faqs', verifyToken, isAdmin, faqCtrl.create);
 router.put('/faqs/:id', verifyToken, isAdmin, faqCtrl.update);
 router.delete('/faqs/:id', verifyToken, isAdmin, faqCtrl.delete);
 
+// Clients (Pengguna SaduX — logo strip on landing page)
+router.get('/clients', cmsController.getClients);
+router.post('/clients', verifyToken, isAdmin, cmsController.createClient);
+router.put('/clients/:id', verifyToken, isAdmin, cmsController.updateClient);
+router.delete('/clients/:id', verifyToken, isAdmin, cmsController.deleteClient);
+router.post('/clients/:id/logo', verifyToken, isAdmin, handleUpload(upload, 'Ukuran logo maksimal 5MB'), cmsController.uploadClientLogo);
+
 module.exports = router;

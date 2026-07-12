@@ -8,6 +8,7 @@ const Testimonial = require('./Testimonial');
 const Faq = require('./Faq');
 const GeneralSetting = require('./GeneralSetting');
 const Visitor = require('./Visitor');
+const Client = require('./Client');
 
 const db = {
     sequelize,
@@ -19,7 +20,8 @@ const db = {
     Testimonial,
     Faq,
     GeneralSetting,
-    Visitor
+    Visitor,
+    Client
 };
 
 module.exports = db;
