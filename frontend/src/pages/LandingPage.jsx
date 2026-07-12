@@ -314,7 +314,14 @@ const LandingPage = () => {
                             <div key={product.id} className={`themed-card group relative overflow-hidden transition-all duration-500 flex flex-col md:flex-row`}
                                 style={{ ...cardStyle, borderRadius: cardRadius }}>
                                 {product.tag && (
-                                    <div className="absolute top-4 left-4 z-20 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-xs font-bold text-white border border-white/10">
+                                    <div className="absolute top-4 left-4 z-20 px-3 py-1 text-xs font-bold"
+                                        style={{
+                                            background: accent,
+                                            color: theme.button_text || '#111',
+                                            border: `2px solid ${theme.card_border_color || '#111'}`,
+                                            boxShadow: `2px 2px 0 ${theme.card_border_color || '#111'}`,
+                                            borderRadius: theme.button_style === 'rounded-full' ? '9999px' : '6px',
+                                        }}>
                                         {product.tag}
                                     </div>
                                 )}
