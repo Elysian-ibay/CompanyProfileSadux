@@ -32,7 +32,7 @@ exports.reorderProducts = async (req, res) => {
 // Create a new product
 exports.createProduct = async (req, res) => {
     try {
-        const { name, price, price_monthly, price_yearly, description, tag, link } = req.body;
+        const { name, price, pricing_type, price_monthly, price_yearly, description, tag, link } = req.body;
         let imagePath = null;
 
         if (req.file) {
@@ -42,6 +42,7 @@ exports.createProduct = async (req, res) => {
         const product = await Product.create({
             name,
             price,
+            pricing_type: pricing_type || 'monthly',
             price_monthly,
             price_yearly,
             description,
@@ -61,7 +62,7 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, price, price_monthly, price_yearly, description, tag, link } = req.body;
+        const { name, price, pricing_type, price_monthly, price_yearly, description, tag, link } = req.body;
         const product = await Product.findByPk(id);
 
         if (!product) {
@@ -76,6 +77,7 @@ exports.updateProduct = async (req, res) => {
         await product.update({
             name,
             price,
+            pricing_type: pricing_type || product.pricing_type || 'monthly',
             price_monthly,
             price_yearly,
             description,

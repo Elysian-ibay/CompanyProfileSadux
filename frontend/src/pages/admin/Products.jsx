@@ -295,12 +295,13 @@ const Products = () => {
                                     name="pricing_type"
                                     value={formData.pricing_type}
                                     onChange={handleInputChange}
-                                    className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500"
+                                    className="w-full border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-purple-500 text-white"
+                                    style={{ backgroundColor: '#1a1a1a' }}
                                 >
-                                    <option value="monthly">Per Bulan</option>
-                                    <option value="yearly">Per Tahun</option>
-                                    <option value="one_time">Sekali Beli (Putus)</option>
-                                    <option value="free">Gratis</option>
+                                    <option value="monthly" style={{ backgroundColor: '#1a1a1a' }}>Per Bulan</option>
+                                    <option value="yearly" style={{ backgroundColor: '#1a1a1a' }}>Per Tahun</option>
+                                    <option value="one_time" style={{ backgroundColor: '#1a1a1a' }}>Sekali Beli (Putus)</option>
+                                    <option value="free" style={{ backgroundColor: '#1a1a1a' }}>Gratis</option>
                                 </select>
                             </div>
 

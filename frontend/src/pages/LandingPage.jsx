@@ -247,7 +247,7 @@ const LandingPage = () => {
                     </div>
                     )}
 
-                    <h1 className={`${getTitleSizeClass('hero', 'text-4xl md:text-6xl')} font-extrabold tracking-tight mb-8 leading-tight`}
+                    <h1 className={`${getTitleSizeClass('hero', 'text-2xl sm:text-4xl md:text-6xl')} font-extrabold tracking-tight mb-8 leading-tight`}
                         style={{
                             fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit',
                             ...getTitleStyle('hero')
@@ -327,21 +327,21 @@ const LandingPage = () => {
                                         </div>
                                     )}
                                 </div>
-                                <div className="p-8 md:w-1/2 flex flex-col justify-center">
-                                    <h3 className="text-2xl font-bold mb-2 text-white" style={{ fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit' }}>{product.name}</h3>
-                                    <p className="text-gray-400 mb-6 text-sm flex-grow">{product.description}</p>
+                                <div className="p-4 md:p-6 md:w-1/2 flex flex-col justify-center">
+                                    <h3 className="text-lg md:text-2xl font-bold mb-2 text-white" style={{ fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit' }}>{product.name}</h3>
+                                    <p className="text-gray-400 mb-4 text-sm flex-grow leading-relaxed">{product.description}</p>
 
-                                    <div className="flex items-center justify-between gap-4">
-                                        <div>
-                                            <span className="font-medium" style={{ color: accent }}>{product.price}</span>
+                                    <div className="flex flex-wrap items-end justify-between gap-3">
+                                        <div className="min-w-0">
+                                            <span className="font-semibold text-sm md:text-base block" style={{ color: accent }}>{product.price}</span>
                                             {product.pricing_type === 'one_time' && product.price_monthly && (
-                                                <div className="mt-1 text-sm text-gray-400" style={{ color: isLight ? theme.muted_color : undefined }}>
-                                                    <span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span>
-                                                    <span className="ml-1 text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400">Bayar Sekali</span>
+                                                <div className="mt-1 flex flex-wrap items-center gap-1.5" style={{ color: isLight ? theme.muted_color : undefined }}>
+                                                    <span className="font-semibold text-sm" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span>
+                                                    <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 whitespace-nowrap">Bayar Sekali</span>
                                                 </div>
                                             )}
                                             {product.pricing_type !== 'one_time' && (product.price_monthly || product.price_yearly) && (
-                                                <div className="mt-1 text-sm text-gray-400 space-y-0.5" style={{ color: isLight ? theme.muted_color : undefined }}>
+                                                <div className="mt-1 text-xs text-gray-400 space-y-0.5" style={{ color: isLight ? theme.muted_color : undefined }}>
                                                     {product.price_monthly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span> / bulan</div>}
                                                     {product.price_yearly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_yearly}</span> / tahun</div>}
                                                 </div>
