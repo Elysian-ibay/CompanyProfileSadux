@@ -29,10 +29,16 @@ exports.reorderProducts = async (req, res) => {
     }
 };
 
+const parsePlatform = (raw) => {
+    if (!raw) return [];
+    if (Array.isArray(raw)) return raw;
+    try { return JSON.parse(raw); } catch { return []; }
+};
+
 // Create a new product
 exports.createProduct = async (req, res) => {
     try {
-        const { name, price, pricing_type, price_monthly, price_yearly, description, tag, link } = req.body;
+        const { name, price, pricing_type, price_monthly, price_yearly, description, tag, link, platform } = req.body;
         let imagePath = null;
 
         if (req.file) {
@@ -48,6 +54,7 @@ exports.createProduct = async (req, res) => {
             description,
             tag,
             link,
+            platform: parsePlatform(platform),
             image: imagePath
         });
 
@@ -62,7 +69,7 @@ exports.createProduct = async (req, res) => {
 exports.updateProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        const { name, price, pricing_type, price_monthly, price_yearly, description, tag, link } = req.body;
+        const { name, price, pricing_type, price_monthly, price_yearly, description, tag, link, platform } = req.body;
         const product = await Product.findByPk(id);
 
         if (!product) {
@@ -83,6 +90,7 @@ exports.updateProduct = async (req, res) => {
             description,
             tag,
             link,
+            platform: parsePlatform(platform),
             image: imagePath
         });
 

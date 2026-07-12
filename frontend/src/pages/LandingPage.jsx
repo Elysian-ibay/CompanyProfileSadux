@@ -45,6 +45,8 @@ const LandingPage = () => {
     const [faqs, setFaqs] = React.useState([]);
     const [settings, setSettings] = React.useState({});
     const [clients, setClients] = React.useState([]);
+    const [filterPlatform, setFilterPlatform] = React.useState('all');
+    const [filterCategory, setFilterCategory] = React.useState('all');
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -299,7 +301,7 @@ const LandingPage = () => {
             {/* Ecosystem Section (Replaces Collection) */}
             <section id="ecosystem" className="relative z-10 py-24 px-4 bg-black/20 backdrop-blur-sm">
                 <div className="max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-end mb-12">
+                    <div className="flex flex-col md:flex-row justify-between items-end mb-8">
                         <div>
                             <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-500 mb-4"
                                 style={{ fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit' }}>
@@ -309,74 +311,164 @@ const LandingPage = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {(products.length > 0 ? products : productFallback).map((product) => (
-                            <div key={product.id} className={`themed-card group relative overflow-hidden transition-all duration-500 flex flex-col md:flex-row`}
-                                style={{ ...cardStyle, borderRadius: cardRadius }}>
-                                {product.tag && (
-                                    <div className="absolute top-4 left-4 z-20 px-3 py-1 text-xs font-bold"
-                                        style={{
-                                            background: accent,
-                                            color: theme.button_text || '#111',
-                                            border: `2px solid ${theme.card_border_color || '#111'}`,
-                                            boxShadow: `2px 2px 0 ${theme.card_border_color || '#111'}`,
-                                            borderRadius: theme.button_style === 'rounded-full' ? '9999px' : '6px',
-                                        }}>
-                                        {product.tag}
+                    {/* Filter Bar */}
+                    {(() => {
+                        const allProducts = products.length > 0 ? products : productFallback;
+                        const categories = ['all', ...Array.from(new Set(allProducts.map(p => p.tag).filter(Boolean)))];
+                        const platforms = ['all', 'Web', 'Mobile', 'Desktop'];
+                        const platformIcons = { all: '✦', Web: '🌐', Mobile: '📱', Desktop: '🖥️' };
+                        const hasPlatformData = allProducts.some(p => Array.isArray(p.platform) && p.platform.length > 0);
+
+                        const filteredProducts = allProducts.filter(p => {
+                            const catMatch = filterCategory === 'all' || p.tag === filterCategory;
+                            const platList = Array.isArray(p.platform) ? p.platform : (typeof p.platform === 'string' ? (() => { try { return JSON.parse(p.platform); } catch { return []; } })() : []);
+                            const platMatch = filterPlatform === 'all' || platList.map(x => x.toLowerCase()).includes(filterPlatform.toLowerCase());
+                            return catMatch && platMatch;
+                        });
+
+                        const FilterBtn = ({ active, onClick, children }) => (
+                            <button
+                                onClick={onClick}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap border ${
+                                    active
+                                        ? ''
+                                        : 'border-transparent hover:border-white/20'
+                                }`}
+                                style={active ? {
+                                    background: accent,
+                                    color: theme.button_text || '#111',
+                                    border: `2px solid ${theme.card_border_color || '#111'}`,
+                                    boxShadow: isLight ? `2px 2px 0 ${theme.card_border_color || '#111'}` : 'none',
+                                } : {
+                                    background: isLight ? 'rgba(0,0,0,0.05)' : 'rgba(255,255,255,0.05)',
+                                    color: isLight ? theme.muted_color || '#555' : '#9ca3af',
+                                }}
+                            >
+                                {children}
+                            </button>
+                        );
+
+                        return (
+                            <>
+                                <div className="flex flex-wrap gap-4 mb-8 items-start">
+                                    {/* Platform Filter */}
+                                    <div className="flex flex-col gap-1.5">
+                                        <span className="text-xs uppercase tracking-widest font-semibold" style={{ color: isLight ? theme.muted_color || '#888' : '#6b7280' }}>Platform</span>
+                                        <div className="flex flex-wrap gap-2">
+                                            {platforms.map(p => (
+                                                <FilterBtn key={p} active={filterPlatform === p} onClick={() => setFilterPlatform(p)}>
+                                                    {platformIcons[p]} {p === 'all' ? 'Semua' : p}
+                                                </FilterBtn>
+                                            ))}
+                                        </div>
                                     </div>
-                                )}
-                                <div className={`aspect-video md:w-1/2 relative overflow-hidden bg-gray-900 group`}>
-                                    {product.image ? (
-                                        <img src={imageUrl(product.image)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
-                                    ) : (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
-                                            <span className="text-4xl opacity-50">⚡</span>
+                                    {/* Divider */}
+                                    <div className="hidden md:block w-px self-stretch mt-5" style={{ background: isLight ? '#ddd' : 'rgba(255,255,255,0.1)' }} />
+                                    {/* Category Filter */}
+                                    {categories.length > 1 && (
+                                        <div className="flex flex-col gap-1.5">
+                                            <span className="text-xs uppercase tracking-widest font-semibold" style={{ color: isLight ? theme.muted_color || '#888' : '#6b7280' }}>Kategori</span>
+                                            <div className="flex flex-wrap gap-2">
+                                                {categories.map(c => (
+                                                    <FilterBtn key={c} active={filterCategory === c} onClick={() => setFilterCategory(c)}>
+                                                        {c === 'all' ? '✦ Semua' : c}
+                                                    </FilterBtn>
+                                                ))}
+                                            </div>
                                         </div>
                                     )}
                                 </div>
-                                <div className="p-4 md:p-6 md:w-1/2 flex flex-col justify-center">
-                                    <h3 className="text-lg md:text-2xl font-bold mb-2 text-white" style={{ fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit' }}>{product.name}</h3>
-                                    <p className="text-gray-400 mb-4 text-sm flex-grow leading-relaxed">{product.description}</p>
 
-                                    <div className="flex flex-wrap items-end justify-between gap-3">
-                                        <div className="min-w-0">
-                                            <span className="font-semibold text-sm md:text-base block" style={{ color: accent }}>{product.price}</span>
-                                            {product.pricing_type === 'one_time' && product.price_monthly && (
-                                                <div className="mt-1 flex flex-wrap items-center gap-1.5" style={{ color: isLight ? theme.muted_color : undefined }}>
-                                                    <span className="font-semibold text-sm" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span>
-                                                    <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 whitespace-nowrap">Bayar Sekali</span>
+                                {/* Result count */}
+                                {(filterPlatform !== 'all' || filterCategory !== 'all') && (
+                                    <p className="text-xs mb-6" style={{ color: isLight ? theme.muted_color || '#888' : '#6b7280' }}>
+                                        Menampilkan <strong style={{ color: accent }}>{filteredProducts.length}</strong> dari {allProducts.length} produk
+                                        {filterPlatform !== 'all' && <> · Platform: <strong>{filterPlatform}</strong></>}
+                                        {filterCategory !== 'all' && <> · Kategori: <strong>{filterCategory}</strong></>}
+                                        <button onClick={() => { setFilterPlatform('all'); setFilterCategory('all'); }} className="ml-2 underline opacity-60 hover:opacity-100">Reset</button>
+                                    </p>
+                                )}
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {filteredProducts.length > 0 ? filteredProducts.map((product) => (
+                                        <div key={product.id} className="themed-card group relative overflow-hidden transition-all duration-500 flex flex-col md:flex-row"
+                                            style={{ ...cardStyle, borderRadius: cardRadius }}>
+                                            {product.tag && (
+                                                <div className="absolute top-4 left-4 z-20 px-3 py-1 text-xs font-bold"
+                                                    style={{
+                                                        background: accent,
+                                                        color: theme.button_text || '#111',
+                                                        border: `2px solid ${theme.card_border_color || '#111'}`,
+                                                        boxShadow: `2px 2px 0 ${theme.card_border_color || '#111'}`,
+                                                        borderRadius: theme.button_style === 'rounded-full' ? '9999px' : '6px',
+                                                    }}>
+                                                    {product.tag}
                                                 </div>
                                             )}
-                                            {product.pricing_type !== 'one_time' && (product.price_monthly || product.price_yearly) && (
-                                                <div className="mt-1 text-xs text-gray-400 space-y-0.5" style={{ color: isLight ? theme.muted_color : undefined }}>
-                                                    {product.price_monthly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span> / bulan</div>}
-                                                    {product.price_yearly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_yearly}</span> / tahun</div>}
+                                            {/* Platform badges */}
+                                            {(() => {
+                                                const platList = Array.isArray(product.platform) ? product.platform : (typeof product.platform === 'string' ? (() => { try { return JSON.parse(product.platform); } catch { return []; } })() : []);
+                                                return platList.length > 0 ? (
+                                                    <div className="absolute top-4 right-4 z-20 flex gap-1">
+                                                        {platList.map(p => (
+                                                            <span key={p} className="text-xs px-2 py-0.5 rounded font-bold"
+                                                                style={{ background: 'rgba(0,0,0,0.7)', color: '#fff', backdropFilter: 'blur(4px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                                                                {p === 'Web' ? '🌐' : p === 'Mobile' ? '📱' : '🖥️'} {p}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ) : null;
+                                            })()}
+                                            <div className="aspect-video md:w-1/2 relative overflow-hidden bg-gray-900 group">
+                                                {product.image ? (
+                                                    <img src={imageUrl(product.image)} alt={product.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" />
+                                                ) : (
+                                                    <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-800 to-black">
+                                                        <span className="text-4xl opacity-50">⚡</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="p-4 md:p-6 md:w-1/2 flex flex-col justify-center">
+                                                <h3 className="text-lg md:text-2xl font-bold mb-2 text-white" style={{ fontFamily: content?.theme_settings?.font_heading ? `"${content.theme_settings.font_heading}", sans-serif` : 'inherit' }}>{product.name}</h3>
+                                                <p className="text-gray-400 mb-4 text-sm flex-grow leading-relaxed">{product.description}</p>
+
+                                                <div className="flex flex-wrap items-end justify-between gap-3">
+                                                    <div className="min-w-0">
+                                                        <span className="font-semibold text-sm md:text-base block" style={{ color: accent }}>{product.price}</span>
+                                                        {product.pricing_type === 'one_time' && product.price_monthly && (
+                                                            <div className="mt-1 flex flex-wrap items-center gap-1.5" style={{ color: isLight ? theme.muted_color : undefined }}>
+                                                                <span className="font-semibold text-sm" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span>
+                                                                <span className="text-xs px-1.5 py-0.5 rounded bg-green-500/20 text-green-400 whitespace-nowrap">Bayar Sekali</span>
+                                                            </div>
+                                                        )}
+                                                        {product.pricing_type !== 'one_time' && (product.price_monthly || product.price_yearly) && (
+                                                            <div className="mt-1 text-xs text-gray-400 space-y-0.5" style={{ color: isLight ? theme.muted_color : undefined }}>
+                                                                {product.price_monthly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_monthly}</span> / bulan</div>}
+                                                                {product.price_yearly && <div><span className="font-semibold" style={{ color: isLight ? theme.heading_color : '#fff' }}>{product.price_yearly}</span> / tahun</div>}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    {product.link && (
+                                                        <a href={product.link} target="_blank" rel="noopener noreferrer"
+                                                            onClick={async () => { try { await api.post(`/products/${product.id}/click`); } catch (err) { console.error("Tracking failed", err); } }}>
+                                                            <button className={`px-6 py-2 bg-white/10 hover:bg-cyan-600/20 text-white border border-white/10 hover:border-cyan-500/50 transition-all flex items-center gap-2 ${content?.theme_settings?.button_style || 'rounded-xl'}`}>
+                                                                Visit <ArrowRight size={16} />
+                                                            </button>
+                                                        </a>
+                                                    )}
                                                 </div>
-                                            )}
+                                            </div>
                                         </div>
-                                        {product.link && (
-                                            <a
-                                                href={product.link}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                onClick={async () => {
-                                                    try {
-                                                        await api.post(`/products/${product.id}/click`);
-                                                    } catch (err) {
-                                                        console.error("Tracking failed", err);
-                                                    }
-                                                }}
-                                            >
-                                                <button className={`px-6 py-2 bg-white/10 hover:bg-cyan-600/20 text-white border border-white/10 hover:border-cyan-500/50 transition-all flex items-center gap-2 ${content?.theme_settings?.button_style || 'rounded-xl'}`}>
-                                                    Visit <ArrowRight size={16} />
-                                                </button>
-                                            </a>
-                                        )}
-                                    </div>
+                                    )) : (
+                                        <div className="col-span-2 text-center py-16 opacity-50">
+                                            <p className="text-lg font-semibold">Tidak ada produk untuk filter ini.</p>
+                                            <button onClick={() => { setFilterPlatform('all'); setFilterCategory('all'); }} className="mt-3 text-sm underline">Reset filter</button>
+                                        </div>
+                                    )}
                                 </div>
-                            </div>
-                        ))}
-                    </div>
+                            </>
+                        );
+                    })()}
                 </div>
             </section>
 

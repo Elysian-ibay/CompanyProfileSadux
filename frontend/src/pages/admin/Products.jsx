@@ -11,6 +11,8 @@ const Products = () => {
     const [dragIndex, setDragIndex] = useState(null);
     const [savingOrder, setSavingOrder] = useState(false);
 
+    const PLATFORMS = ['Web', 'Mobile', 'Desktop'];
+
     // Form State
     const [formData, setFormData] = useState({
         name: '',
@@ -21,6 +23,7 @@ const Products = () => {
         description: '',
         tag: '',
         link: '',
+        platform: [],
         image: null
     });
 
@@ -72,7 +75,22 @@ const Products = () => {
         }
     };
 
+    const togglePlatform = (p) => {
+        setFormData(prev => {
+            const current = Array.isArray(prev.platform) ? prev.platform : [];
+            return {
+                ...prev,
+                platform: current.includes(p) ? current.filter(x => x !== p) : [...current, p]
+            };
+        });
+    };
+
     const handleEdit = (product) => {
+        const rawPlatform = product.platform;
+        const parsedPlatform = Array.isArray(rawPlatform)
+            ? rawPlatform
+            : (typeof rawPlatform === 'string' ? (() => { try { return JSON.parse(rawPlatform); } catch { return []; } })() : []);
+
         setFormData({
             name: product.name,
             price: product.price,
@@ -82,7 +100,8 @@ const Products = () => {
             description: product.description,
             tag: product.tag,
             link: product.link,
-            image: null // Don't preload image file, only replace if needed
+            platform: parsedPlatform,
+            image: null
         });
         setEditingId(product.id);
         setIsEditing(true);
@@ -93,7 +112,7 @@ const Products = () => {
         setIsModalOpen(false);
         setIsEditing(false);
         setEditingId(null);
-        setFormData({ name: '', price: '', pricing_type: 'monthly', price_monthly: '', price_yearly: '', description: '', tag: '', link: '', image: null });
+        setFormData({ name: '', price: '', pricing_type: 'monthly', price_monthly: '', price_yearly: '', description: '', tag: '', link: '', platform: [], image: null });
     };
 
     const handleInputChange = (e) => {
@@ -115,6 +134,7 @@ const Products = () => {
             data.append('pricing_type', formData.pricing_type || 'monthly');
             data.append('price_monthly', formData.price_monthly || '');
             data.append('price_yearly', formData.price_yearly || '');
+            data.append('platform', JSON.stringify(Array.isArray(formData.platform) ? formData.platform : []));
             data.append('description', formData.description);
             data.append('tag', formData.tag);
             data.append('link', formData.link);
@@ -342,13 +362,37 @@ const Products = () => {
                             ) : null}
 
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Tag (e.g. Best Seller)</label>
+                                <label className="block text-sm text-gray-400 mb-1">Kategori <span className="text-gray-600">(e.g. Esports, Enterprise, Retail)</span></label>
                                 <input
                                     name="tag"
                                     value={formData.tag}
                                     onChange={handleInputChange}
+                                    placeholder="e.g. Esports & Olahraga"
                                     className="w-full bg-white/5 border border-white/10 rounded-lg p-2.5 focus:outline-none focus:border-blue-500"
                                 />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm text-gray-400 mb-2">Platform <span className="text-gray-600">(bisa pilih lebih dari satu)</span></label>
+                                <div className="flex gap-3">
+                                    {PLATFORMS.map(p => {
+                                        const active = Array.isArray(formData.platform) && formData.platform.includes(p);
+                                        return (
+                                            <button
+                                                key={p}
+                                                type="button"
+                                                onClick={() => togglePlatform(p)}
+                                                className={`flex-1 py-2 rounded-lg text-sm font-semibold border transition-all ${
+                                                    active
+                                                        ? 'bg-blue-600 border-blue-500 text-white'
+                                                        : 'bg-white/5 border-white/10 text-gray-400 hover:border-white/30 hover:text-white'
+                                                }`}
+                                            >
+                                                {p === 'Web' ? '🌐' : p === 'Mobile' ? '📱' : '🖥️'} {p}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
 
                             <div>

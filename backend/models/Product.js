@@ -45,6 +45,10 @@ const Product = sequelize.define('Product', {
     pricing_type: {
         type: DataTypes.STRING,
         defaultValue: 'monthly' // monthly | yearly | one_time | free
+    },
+    platform: {
+        type: DataTypes.JSON,
+        defaultValue: [] // ['web', 'mobile', 'desktop'] — multi-select
     }
 });
 
