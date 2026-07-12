@@ -437,43 +437,87 @@ const LandingPage = () => {
 
             {/* Clients / Pengguna SaduX Section */}
             {clients.length > 0 && (
-                <section className="relative z-10 py-16 px-4 bg-black/10" style={getSectionStyle('clients')}>
-                    <div className="max-w-6xl mx-auto">
-                        <div className="text-center mb-10">
-                            <p className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: accent }}>Dipercaya Oleh</p>
-                            <h2 className={`${getTitleSizeClass('clients', 'text-2xl md:text-3xl')} font-bold`} style={{ color: isLight ? theme.heading_color : '#fff', ...getTitleStyle('clients') }}>
+                <section className="relative z-10 py-20 px-4 overflow-hidden" style={getSectionStyle('clients')}>
+                    {/* Accent strip at top */}
+                    <div className="absolute top-0 left-0 right-0 h-1" style={{ background: accent }} />
+
+                    {/* Background decoration */}
+                    {!isLight && (
+                        <>
+                            <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-96 h-96 rounded-full blur-[120px] opacity-10" style={{ background: accent }} />
+                            <div className="absolute top-1/2 right-1/4 -translate-y-1/2 w-72 h-72 rounded-full blur-[100px] opacity-10 bg-blue-500" />
+                        </>
+                    )}
+
+                    <div className="max-w-6xl mx-auto relative z-10">
+                        {/* Header */}
+                        <div className="text-center mb-14">
+                            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-4"
+                                style={{
+                                    background: isLight ? accent : `${accent}22`,
+                                    color: isLight ? (theme.button_text || '#111') : accent,
+                                    border: `2px solid ${accent}`,
+                                    boxShadow: isLight ? `3px 3px 0 ${theme.card_border_color || '#111'}` : `0 0 20px ${accent}44`,
+                                }}>
+                                <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: isLight ? (theme.card_border_color || '#111') : accent }} />
+                                Dipercaya Oleh
+                            </div>
+                            <h2 className={`${getTitleSizeClass('clients', 'text-3xl md:text-4xl')} font-extrabold`}
+                                style={{ color: isLight ? theme.heading_color : '#fff', fontFamily: theme.font_heading ? `"${theme.font_heading}", sans-serif` : 'inherit', ...getTitleStyle('clients') }}>
                                 Pengguna SaduX
                             </h2>
+                            <div className="mt-3 mx-auto h-1 w-16 rounded-full" style={{ background: accent }} />
                         </div>
-                        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12">
+
+                        {/* Client Cards Grid */}
+                        <div className="flex flex-wrap justify-center gap-5 md:gap-6">
                             {clients.map((client) => (
-                                <a
+                                <motion.a
                                     key={client.id}
                                     href={client.website || '#'}
                                     target={client.website ? '_blank' : '_self'}
                                     rel="noopener noreferrer"
-                                    className="flex flex-col items-center gap-3 group transition-all duration-300 hover:scale-105"
-                                    title={client.name}
+                                    whileHover={{ y: -4, scale: 1.03 }}
+                                    transition={{ duration: 0.2 }}
+                                    className="flex flex-col items-center gap-3 group"
+                                    style={{
+                                        background: isLight ? '#fff' : 'rgba(255,255,255,0.05)',
+                                        border: `2px solid ${isLight ? (theme.card_border_color || '#111') : `${accent}44`}`,
+                                        borderRadius: isLight ? '8px' : cardRadius,
+                                        boxShadow: isLight
+                                            ? `4px 4px 0 ${theme.card_border_color || '#111'}`
+                                            : `0 4px 24px ${accent}22`,
+                                        padding: '20px 28px',
+                                        minWidth: '130px',
+                                        maxWidth: '180px',
+                                    }}
                                 >
                                     {client.logo ? (
-                                        <img
-                                            src={imageUrl(client.logo)}
-                                            alt={client.name}
-                                            className="h-12 md:h-14 w-auto object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-300 filter grayscale group-hover:grayscale-0"
-                                        />
+                                        <div className="w-20 h-14 flex items-center justify-center">
+                                            <img
+                                                src={imageUrl(client.logo)}
+                                                alt={client.name}
+                                                className="max-h-14 max-w-full w-auto object-contain transition-all duration-300"
+                                                style={{ filter: isLight ? 'none' : 'brightness(0) invert(1)' }}
+                                            />
+                                        </div>
                                     ) : (
-                                        <div className="h-12 w-28 rounded-lg flex items-center justify-center text-xs font-bold uppercase tracking-wide opacity-60 group-hover:opacity-100 transition-opacity"
-                                            style={{ background: isLight ? '#e5e7eb' : 'rgba(255,255,255,0.08)', color: isLight ? theme.heading_color : '#fff', border: `1px solid ${theme.card_border_color || 'rgba(255,255,255,0.1)'}` }}>
-                                            {client.name}
+                                        <div className="w-20 h-14 rounded-lg flex items-center justify-center text-lg font-black"
+                                            style={{ background: accent, color: theme.button_text || '#111' }}>
+                                            {client.name.charAt(0)}
                                         </div>
                                     )}
-                                    <span className="text-xs text-gray-500 group-hover:text-gray-300 transition-colors text-center max-w-[100px] leading-tight">
+                                    <span className="text-xs font-bold text-center leading-tight uppercase tracking-wide"
+                                        style={{ color: isLight ? theme.heading_color : '#fff' }}>
                                         {client.name}
                                     </span>
-                                </a>
+                                </motion.a>
                             ))}
                         </div>
                     </div>
+
+                    {/* Accent strip at bottom */}
+                    <div className="absolute bottom-0 left-0 right-0 h-1" style={{ background: accent }} />
                 </section>
             )}
 
