@@ -4,6 +4,50 @@
 
 ---
 
+## [v3.5.0] - SEO lengkap, favicon global, OG meta, bot scraping (2026-07-13)
+
+- **OG / meta tag lengkap** di `frontend/index.html`: `og:title`, `og:description`, `og:image`, `og:url`, `og:image:width/height`, `og:site_name`, `twitter:card/title/description/image`, `apple-touch-icon`, `robots: index follow`, link `sitemap.xml`. Semua pakai `id=` agar bisa di-override JS.
+- **`applyGlobalBranding()`** diperluas di `frontend/src/App.jsx`: sekarang isi semua meta tag (og:image = `site_logo`, apple-touch-icon, og:url = `https://sadux.my.id`, og:site_name, tw:image, dll) — berjalan di **semua route** termasuk `/admin/*`.
+- **`frontend/middleware.js`** (Vercel Edge Middleware baru): deteksi bot/scraper (WhatsApp, Facebook, Telegram, Twitter, LinkedIn, Slack, Google, dll) via User-Agent → fetch `/cms/settings` dari backend → return HTML minimal dengan meta tag penuh. Pengguna biasa lewat tanpa perubahan (Vite SPA tetap normal).
+- **`frontend/public/logo.png`**: file logo SaduX statis ditambahkan ke `public/` → di-serve di `https://sadux.my.id/logo.png`. Favicon, og:image, apple-touch-icon semuanya default ke URL ini — tidak butuh JS/DB untuk scrapers.
+- **`frontend/public/robots.txt`**: `User-agent: * / Allow: / / Sitemap: https://sadux.my.id/sitemap.xml`.
+- **`frontend/public/sitemap.xml`**: satu entry canonical `https://sadux.my.id/` dengan image entry logo.
+- **Domain canonical** `https://sadux.my.id` di-hardcode di `og:url` dan middleware.
+
+## [v3.4.0] - Filter produk, platform, one-time pricing, klien, admin responsif (2026-07-13)
+
+### Pengguna SaduX (Klien)
+- **Model `Client`** baru: `name`, `logo` (Supabase URL), `website`, `order`.
+- **CRUD endpoints**: `GET /api/cms/clients` (publik), `POST/PUT/DELETE` + `POST /api/cms/clients/:id/logo` (admin).
+- **Landing page section** "Pengguna SaduX": kartu beranimasi (Framer Motion) dengan accent strip, logo klien, nama perusahaan — hanya muncul jika ada ≥1 klien di DB.
+- **Admin tab "Klien"** di ContentManager: form tambah/edit + upload logo per-klien.
+- **SQL manual Supabase**: `CREATE TABLE "Clients" (...)` — lihat bagian Migrasi Manual di `DATABASE_SCHEMA.md`.
+
+### Tipe Harga & Platform Produk
+- **`Products.pricing_type`** (STRING, default `'monthly'`): nilai valid = `monthly | yearly | one_time | free`. Dropdown di admin (sudah perbaiki bug invisible option dengan inline `backgroundColor` style).
+- **`Products.platform`** (JSON, default `[]`): multi-select platform = `['Web', 'Mobile', 'Desktop']`. Dikirim via FormData sebagai `JSON.stringify()`, di-parse backend dengan helper `parsePlatform()`.
+- **Bug fix**: `pricing_type` tidak tersimpan saat Update — root cause: field tidak ada di destructuring `productController.js`. Diperbaiki di create + update.
+- **SQL manual Supabase**: `ALTER TABLE "Products" ADD COLUMN IF NOT EXISTS "pricing_type" VARCHAR(255) DEFAULT 'monthly'; ALTER TABLE "Products" ADD COLUMN IF NOT EXISTS "platform" JSON DEFAULT '[]';`
+
+### Filter Bar Ekosistem (Landing Page)
+- **Filter Platform**: tombol Semua / 🌐 Web / 📱 Mobile / 🖥️ Desktop — hanya tampil jika ada produk dengan data platform.
+- **Filter Kategori**: auto-detect dari `tag` produk yang ada di DB.
+- **Counter hasil** filter: "Menampilkan X dari Y produk" + tombol Reset.
+- **Empty state**: "Tidak ada produk untuk filter ini."
+- **Platform badge** muncul di card produk (kanan atas, backdrop blur).
+- Logika filter menggunakan pola IIFE di dalam JSX untuk menghindari state tambahan.
+- **Field "Tag" diganti nama "Kategori"** di admin Products.
+
+### Admin Panel Responsif
+- **`AdminLayout.jsx`** didesain ulang: sidebar `fixed md:relative`, hamburger `<Menu>` button di header mobile, overlay backdrop saat sidebar terbuka, auto-close saat navigasi (`useEffect([location.pathname])`), click-outside close via `sidebarRef`.
+- **Tabs ContentManager**: `overflow-x-auto` horizontal scroll, font lebih kecil di mobile.
+
+### UI Fixes
+- **Hero text mobile**: `text-2xl sm:text-4xl md:text-6xl` (sebelumnya `text-4xl` — terlalu besar di HP).
+- **Product card price**: `p-4 md:p-6` (sebelumnya `p-8`), `flex-wrap`, `text-sm md:text-base` — tidak overflow di mobile.
+- **Tag/Kategori badge**: pakai `accent` background + border + hard shadow — tidak lagi `bg-black/60` yang hilang di atas gambar gelap.
+- **"Pengguna SaduX" section**: didesain ulang dengan accent strips, animated cards, Framer Motion entrance — menggantikan tampilan awal yang datar.
+
 ## [v3.3.0] - Dual pricing, editable footer, mobile menu polish (2026-07-10)
 
 - **Harga per-bulan & per-tahun** produk: kolom `Products.price_monthly` + `price_yearly`. Form admin (Label Harga + Harga/Bulan + Harga/Tahun), tampil di kartu admin & landing "Our Ecosystem". Opsional (kosong = tidak tampil).

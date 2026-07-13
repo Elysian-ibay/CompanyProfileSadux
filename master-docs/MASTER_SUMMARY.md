@@ -2,7 +2,7 @@
 
 > Dokumen ini merangkum status implementasi dari **implementation_plan.md** (V1) dan **implementation_plan_v2.md** (V2) terhadap codebase aktual.
 
-> **STATUS (2026-07-10): LIVE di production.** Frontend & backend di **Vercel**, database & storage di **Supabase (PostgreSQL)**. Untuk gambaran menyeluruh & cara operasional, baca **`handoff/HANDOFF.md`**. Perubahan besar sejak dokumen ini ditulis: deploy Vercel+Supabase, JWT auth ditegakkan, sistem tema baru (default **Retro**, 6 tema switchable). Detail: `MASTER_CHANGELOG.md` v3.0.0.
+> **STATUS (2026-07-13): LIVE di production.** Domain: **https://sadux.my.id**. Frontend & backend di **Vercel**, database & storage di **Supabase (PostgreSQL)**. Untuk gambaran menyeluruh & cara operasional, baca **`handoff/HANDOFF.md`**. Versi terakhir: **v3.5.0** — filter produk, klien/pengguna SaduX, SEO/OG meta, bot scraping. Detail: `MASTER_CHANGELOG.md`.
 
 ---
 
@@ -114,12 +114,17 @@
 | Fitur | Detail | Lokasi |
 |---|---|---|
 | **Dynamic Background System** | 16 pilihan animated background (galaxy, aurora, snowfall, dll) | `frontend/src/components/DynamicBackground.jsx`, ContentManager background tab |
-| **Appearance/Theme System** | 3 preset themes (Modern Tech, Creative Studio, Elegant Dark), custom typography, button styles, glassmorphism cards | ContentManager appearance tab, `LandingPageContent.theme_settings` |
+| **Appearance/Theme System** | 6 preset themes (Retro default, Modern Tech, dll), custom typography, glassmorphism | ContentManager appearance tab, `frontend/src/lib/themes.js` |
 | **Per-Section Custom Styling** | Setiap section bisa punya font, warna, background sendiri | `ContentManager.jsx` renderSectionStyler, `LandingPage.jsx` getSectionStyle |
 | **Analytics/Visitor Tracking** | Track visits, dashboard stats | `backend/controllers/analyticsController.js`, `backend/models/Visitor.js` |
-| **Product Management** | CRUD products dengan click tracking | `backend/models/Product.js`, `frontend/src/pages/admin/Products.jsx` |
+| **Product Management** | CRUD + click tracking + drag-and-drop order + `pricing_type` + `platform` filter | `backend/models/Product.js`, `frontend/src/pages/admin/Products.jsx` |
+| **Filter Bar Ekosistem** | Filter produk per-platform (Web/Mobile/Desktop) + kategori (dari tag) | `frontend/src/pages/LandingPage.jsx` |
+| **Pengguna SaduX** | Section klien di landing page: logo + nama perusahaan, animated cards | `backend/models/Client.js`, `frontend/src/pages/LandingPage.jsx` |
+| **Admin Panel Responsif** | Sidebar mobile (hamburger, overlay, auto-close), tab scroll | `frontend/src/layouts/AdminLayout.jsx` |
+| **SEO & Scraping** | OG/Twitter meta lengkap, Edge Middleware bot detection, logo statis, robots.txt, sitemap.xml | `frontend/middleware.js`, `frontend/index.html`, `frontend/public/` |
+| **Global Branding** | Favicon + title + semua meta tag dari CMS, berjalan di semua route | `frontend/src/App.jsx` `applyGlobalBranding()` |
 | **PWA Support** | `vite-plugin-pwa` dependency installed | `frontend/package.json` |
-| **Auth System** | JWT-based admin authentication | `backend/routes/authRoutes.js`, `frontend/src/pages/LoginPage.jsx` |
+| **Auth System** | JWT-based admin authentication, enforced di semua mutasi | `backend/routes/authRoutes.js`, `backend/middleware/auth.js` |
 
 ---
 
@@ -134,10 +139,10 @@
 ### Items Belum Selesai (Backlog)
 
 1. **Teaser Image Upload** - Backend multer middleware belum di-wire ke content route, frontend belum ada upload UI
-2. **Footer Dynamic Contacts** - Footer masih hardcoded, belum consume GeneralSetting data
-3. **Navbar Dynamic Menu** - Menu links masih hardcoded di `Navbar.jsx`
-4. **Testimonial Photo Upload** - Masih pakai avatar huruf pertama, belum ada upload
-5. **`meta_description` field** - Ada di plan V2 tapi belum ada di model GeneralSetting
+2. **Navbar Dynamic Menu** - Menu links masih hardcoded di `Navbar.jsx`
+3. **Testimonial Photo Upload** - Masih pakai avatar huruf pertama, belum ada upload
+4. **`meta_description` field** - Ada di plan V2 tapi belum ada di model GeneralSetting
+5. **Sitemap dinamis** - `sitemap.xml` masih statis, belum auto-update saat produk bertambah
 
 ---
 

@@ -1,7 +1,7 @@
 # 🚀 Handoff — SaduX Company Profile CMS
 
 > Dokumen serah-terima. Status: **LIVE di production** (Vercel + Supabase). Landing page + admin CMS berjalan penuh.
-> Terakhir diperbarui: 2026-07-10 (mencakup s/d v3.3.0).
+> Terakhir diperbarui: 2026-07-13 (mencakup s/d v3.5.0).
 
 ---
 
@@ -24,11 +24,14 @@ SaduX Company Profile adalah **CMS landing page dinamis** (gaya WordPress): selu
 
 | Bagian | URL |
 |---|---|
-| **Landing page** | https://compro-frontend-sadux.vercel.app |
-| **Admin login** | https://compro-frontend-sadux.vercel.app/login/super-admin |
+| **Landing page** | https://sadux.my.id |
+| **Admin login** | https://sadux.my.id/login/super-admin |
 | **Backend API** | https://compro-backend-sadux.vercel.app |
 | **API health** | https://compro-backend-sadux.vercel.app/ → "API SaduX Company Profile is running..." |
 | **API contoh** | https://compro-backend-sadux.vercel.app/api/content |
+| **Logo statis** | https://sadux.my.id/logo.png |
+| **robots.txt** | https://sadux.my.id/robots.txt |
+| **sitemap.xml** | https://sadux.my.id/sitemap.xml |
 
 > ⚠️ URL login adalah **`/login/super-admin`**, BUKAN `/login`.
 
@@ -69,18 +72,22 @@ Variabel yang dipakai: `DATABASE_URL`, `JWT_SECRET`, `SUPABASE_URL`, `SUPABASE_S
 ## 5. Arsitektur
 
 ```
-[Browser]
-   │
-   ▼
-[Vercel: FRONTEND]  ── VITE_API_URL ──►  [Vercel: BACKEND (serverless Express)]
- React SPA (Vite)                              │
+[Bot / Scraper]──────────────────────────────────────────────────────────────────┐
+                                                                                  │
+[Browser / Manusia]                                                               │
+   │                                                                              ▼
+   ▼                                                               [middleware.js — Vercel Edge]
+[Vercel: FRONTEND]  ── VITE_API_URL ──►  [Vercel: BACKEND (serverless Express)]  │
+ React SPA (Vite)      (build-time)             │                 (fetch settings)─┘
  Root: frontend/                               ├─► [Supabase PostgreSQL]  (data, pooler :6543)
-                                               └─► [Supabase Storage]     (gambar upload, bucket "uploads")
+ /logo.png (statis)                            └─► [Supabase Storage]     (gambar, bucket "uploads")
+ /robots.txt, /sitemap.xml
 ```
 
+- **Bot** (WhatsApp/Facebook/Google/dll): ditangkap `middleware.js` → fetch `/cms/settings` → return HTML meta penuh. Pengguna biasa: SPA normal.
 - Frontend memanggil backend via `VITE_API_URL = https://compro-backend-sadux.vercel.app/api`.
-- Backend membatasi CORS via `CLIENT_ORIGIN = https://compro-frontend-sadux.vercel.app`.
-- Backend konek DB via `DATABASE_URL` (Supabase **Transaction pooler**, port **6543**, region ap-northeast-1).
+- Backend membatasi CORS via `CLIENT_ORIGIN = https://sadux.my.id`.
+- Backend konek DB via `DATABASE_URL` (Supabase **Transaction pooler**, port **6543**).
 
 ---
 
@@ -139,10 +146,10 @@ Pakai MySQL lokal (XAMPP): set `DB_DIALECT=mysql`, kosongkan `DATABASE_URL`, isi
 
 ## 9. Database (Supabase PostgreSQL)
 
-- **9 tabel:** Users, Products, LandingPageContents (singleton, isi semua konten + `theme_settings`), Features, Statistics, Testimonials, Faqs, GeneralSettings (singleton), Visitors.
+- **10 tabel:** Users, Products, LandingPageContents (singleton, isi semua konten + `theme_settings`), Features, Statistics, Testimonials, Faqs, GeneralSettings (singleton), Visitors, **Clients** (baru v3.4).
 - **Schema lengkap:** [`../database/DATABASE_SCHEMA.md`](../database/DATABASE_SCHEMA.md).
 - **Migrate/seed** dijalankan dari lokal (bukan di Vercel). Sudah dilakukan → DB production sudah terisi.
-- **⚠️ Migrasi kolom pasca-rilis** ditambahkan lewat **SQL manual di Supabase** (Vercel tidak auto-sync schema). Semua statement `ALTER ... IF NOT EXISTS` terkumpul di bagian **"Migrasi Manual (Post-Release)"** pada `DATABASE_SCHEMA.md`. **Setiap kali menambah kolom/model baru**, jalankan `npm run db:migrate` dari lokal (mengubah Supabase) ATAU paste SQL-nya di Supabase.
+- **⚠️ Migrasi kolom pasca-rilis** ditambahkan lewat **SQL manual di Supabase** (Vercel tidak auto-sync schema). Semua statement `ALTER/CREATE ... IF NOT EXISTS` terkumpul di bagian **"Migrasi Manual"** pada `DATABASE_SCHEMA.md`. **Setiap kali menambah kolom/model baru**, jalankan SQL di Supabase → SQL Editor.
 - **Verifikasi:** Supabase → Table Editor.
 - **Backup/restore lokal:** `npm run db:backup` / `npm run db:restore` (JSON di `backend/backups/`).
 
@@ -176,22 +183,35 @@ Pakai MySQL lokal (XAMPP): set `DB_DIALECT=mysql`, kosongkan `DATABASE_URL`, isi
 
 ## 13. Yang Dikerjakan di Sesi Ini
 
-1. **Adaptasi deploy** MySQL → Supabase PostgreSQL; backend jadi serverless (Vercel `builds`/`routes` → `server.js`); env-driven dialect + `DATABASE_URL`.
-2. **Upload** dipindah dari disk lokal → **Supabase Storage** (multer memory + `utils/storage.js`).
-3. **Auth JWT** diberlakukan di semua route mutasi (sebelumnya token dibuat tapi tak pernah diverifikasi).
-4. **Sistem tema** baru: registry 6 tema, **Retro jadi default**, bisa diganti via CMS.
-5. **Frontend Vercel:** SPA rewrite, `imageUrl()` helper untuk URL absolut.
-6. **Perbaikan deploy:** force-bundle driver `pg` (fix `FUNCTION_INVOCATION_FAILED`), CORS di-normalize (trailing slash), `VITE_API_URL` harus `/api`.
-7. **Dokumentasi:** panduan deploy Vercel+Supabase, changelog, schema, handoff ini.
-8. **Ganti password admin** dari panel (menu profil → Ganti Password). Endpoint `POST /auth/change-password`.
-9. **Urutan produk drag-and-drop** di admin (`Products.order`, `PUT /products/reorder`).
-10. **Hero badge editable** via CMS (`hero_badge_text`) + readable di retro.
-11. **Branding:** upload **logo & favicon** (Supabase Storage), tampil di navbar/footer + tab browser. Logo + wordmark tampil bersamaan.
-12. **Harga per-bulan & per-tahun** produk (`price_monthly`, `price_yearly`).
-13. **Footer sepenuhnya editable** via CMS (tab Footer): deskripsi, kolom link, sosial media, powered-by.
-14. **Navbar mobile** ikut tema + gaya neobrutalist untuk retro.
+### v3.0.0 – v3.3.0 (2026-07-10)
+1. **Adaptasi deploy** MySQL → Supabase PostgreSQL; backend serverless Vercel; env-driven dialect + `DATABASE_URL`.
+2. **Upload** → Supabase Storage (multer memory + `utils/storage.js`).
+3. **Auth JWT** ditegakkan semua route mutasi.
+4. **Sistem tema** 6 tema, Retro default, switchable via CMS.
+5. **Ganti password** admin dari panel.
+6. **Urutan produk** drag-and-drop (`Products.order`).
+7. **Branding:** logo & favicon upload ke Supabase Storage.
+8. **Harga per-bulan/tahun** produk (`price_monthly`, `price_yearly`).
+9. **Footer sepenuhnya editable** via CMS (deskripsi, kolom link, sosial media, powered-by).
+10. **Navbar mobile** ikut tema + neobrutalist untuk retro.
 
-Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md) (s/d v3.3.0).
+### v3.4.0 (2026-07-13)
+11. **Pengguna SaduX** — model `Client` baru, CRUD API, section landing page (animated cards), tab admin "Klien".
+12. **`pricing_type`** produk: `monthly/yearly/one_time/free`. Fix bug tidak tersimpan saat Update.
+13. **`platform`** produk: multi-select Web/Mobile/Desktop. Badge di landing page.
+14. **Filter bar** landing page: filter platform + kategori, counter, empty state, reset.
+15. **Admin panel responsif**: sidebar mobile (hamburger, overlay, auto-close), tabs scroll.
+16. **Bug fixes**: hero text terlalu besar mobile, price overflow, tag/kategori badge tak terbaca, dropdown option invisible.
+
+### v3.5.0 (2026-07-13)
+17. **OG/meta tag lengkap** di `index.html`: semua property og:* dan twitter:*, apple-touch-icon, robots, sitemap link.
+18. **`applyGlobalBranding()`** diperluas: isi semua meta tag dari CMS, jalan di semua route termasuk admin.
+19. **Vercel Edge Middleware** (`frontend/middleware.js`): deteksi bot → return HTML meta penuh dari CMS → WhatsApp/Facebook/Telegram/Slack/Google bisa scrape.
+20. **Logo statis** `public/logo.png` → default og:image & favicon tanpa butuh JS.
+21. **`robots.txt`** dan **`sitemap.xml`** ditambahkan di `public/`.
+22. **Domain canonical** `https://sadux.my.id` di-hardcode.
+
+Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md) (s/d v3.5.0).
 
 ---
 
@@ -199,10 +219,13 @@ Detail changelog: [`../MASTER_CHANGELOG.md`](../MASTER_CHANGELOG.md) (s/d v3.3.0
 
 | Prioritas | Item |
 |---|---|
-| 🔴 Tinggi | **Ganti password admin default** (`admin/admin123`). Sudah ada UI: Admin → menu profil → **Ganti Password**. Segera ganti. |
-| 🟡 Sedang | `backend/.env-dev` masih ter-track di git (berisi JWT dev lemah) — sebaiknya `git rm --cached backend/.env-dev`. |
-| 🟢 Rendah | **Footer** kini editable via CMS ✅. **Navbar** link menu (Home/Ecosystem/About/Contact) & teks brand "SaduX" masih hardcoded — belum editable. |
-| 🟢 Rendah | Upload foto testimonial belum ada UI (produk & branding sudah bisa upload; teaser pakai `teaser_image` bila di-set). |
+| 🔴 Tinggi | **Ganti password admin default** (`admin/admin123`). UI ada: Admin → menu profil → **Ganti Password**. |
+| 🔴 Tinggi | **Jalankan SQL migrasi v3.4** di Supabase SQL Editor (tabel `Clients` + kolom `pricing_type`/`platform` di `Products`) — lihat `DATABASE_SCHEMA.md`. |
+| 🟡 Sedang | `backend/.env-dev` masih ter-track di git — `git rm --cached backend/.env-dev`. |
+| 🟡 Sedang | WhatsApp cache preview lama (sebelum logo) masih tersimpan ~7 hari. Kirim URL baru `?v=2` untuk memaksa preview baru. |
+| 🟢 Rendah | **Navbar** link menu masih hardcoded (`Navbar.jsx`) — belum editable via CMS. |
+| 🟢 Rendah | Upload foto testimonial belum ada UI. |
+| 🟢 Rendah | `sitemap.xml` masih statis — pertimbangkan auto-generate dari endpoint API saat produk bertambah. |
 | 🟢 Rendah | Bundle frontend >500KB — pertimbangkan code-splitting bila perlu. |
 
 ---

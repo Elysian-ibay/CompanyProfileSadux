@@ -2,11 +2,12 @@
 
 > Dokumentasi lengkap semua tabel database. Sequelize auto-generate `id`, `createdAt`, `updatedAt` pada setiap tabel.
 
-> **UPDATE (2026-07-10):**
-> - **Engine:** production sekarang **PostgreSQL (Supabase)**, bukan MySQL. Struktur tabel sama (Sequelize portable). Lokal masih bisa MySQL/XAMPP via `DB_DIALECT=mysql`.
-> - **Tema default:** `LandingPageContents.active_theme` = **`retro`**, `background_style` = `none`, `accent_color` = `#ffd800`, `theme_settings` = konfigurasi retro (lihat `backend/models/LandingPageContent.js` & `frontend/src/lib/themes.js`).
-> - **Auth:** kolom "Auth: Yes" di tabel API di bawah kini **benar-benar ditegakkan** (JWT admin via `backend/middleware/auth.js`).
-> - **Kolom tambahan pasca-rilis** (ditambah via SQL manual di Supabase karena Vercel tidak auto-migrate) — lihat bagian **"Migrasi Manual (Post-Release)"** di bawah.
+> **UPDATE (2026-07-13, terakhir):**
+> - **Engine:** production = **PostgreSQL (Supabase)**. Lokal opsional MySQL/XAMPP via `DB_DIALECT=mysql`.
+> - **10 tabel:** ditambah tabel `Clients` (v3.4.0 — "Pengguna SaduX").
+> - **Tema default:** `active_theme` = **`retro`**, `accent_color` = `#ffd800`.
+> - **Auth:** semua route mutasi ditegakkan JWT (`backend/middleware/auth.js`).
+> - **Kolom tambahan pasca-rilis** — dijalankan via SQL manual di Supabase. Lihat bagian **"Migrasi Manual"** di bawah.
 
 ---
 
@@ -15,6 +16,8 @@
 > Kolom-kolom ini ditambahkan setelah rilis awal. Di lokal cukup `npm run db:migrate`. Di production (Supabase) dijalankan lewat **SQL Editor** (Vercel tidak auto-sync schema). Semua idempotent (`IF NOT EXISTS`).
 
 ```sql
+-- ── v3.1–v3.3 ─────────────────────────────────────────────────────────────
+
 -- Produk: urutan drag-and-drop + harga bulanan/tahunan
 ALTER TABLE "Products"
   ADD COLUMN IF NOT EXISTS "order" INTEGER DEFAULT 0,
@@ -35,15 +38,35 @@ ALTER TABLE "GeneralSettings"
   ADD COLUMN IF NOT EXISTS "social_links" JSONB,
   ADD COLUMN IF NOT EXISTS "footer_powered_by" VARCHAR(255),
   ADD COLUMN IF NOT EXISTS "footer_powered_by_url" VARCHAR(255);
+
+-- ── v3.4.0 ─────────────────────────────────────────────────────────────────
+
+-- Tabel baru: Klien / Pengguna SaduX
+CREATE TABLE IF NOT EXISTS "Clients" (
+  "id"        SERIAL PRIMARY KEY,
+  "name"      VARCHAR(255) NOT NULL,
+  "logo"      VARCHAR(255),
+  "website"   VARCHAR(255),
+  "order"     INTEGER DEFAULT 0,
+  "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL,
+  "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL
+);
+
+-- Produk: tipe harga & platform
+ALTER TABLE "Products"
+  ADD COLUMN IF NOT EXISTS "pricing_type" VARCHAR(255) DEFAULT 'monthly',
+  ADD COLUMN IF NOT EXISTS "platform"     JSON         DEFAULT '[]';
 ```
 
-**Ringkasan kolom baru:**
-- `Products`: `order` (INT), `price_monthly` (STR), `price_yearly` (STR)
-- `LandingPageContents`: `hero_badge_text` (STR)
-- `GeneralSettings`: `site_logo`, `site_favicon`, `footer_description`, `footer_columns` (JSON), `social_links` (JSON), `footer_powered_by`, `footer_powered_by_url`
+**Ringkasan kolom/tabel baru:**
+- `Products` (v3.1): `order` (INT), `price_monthly` (STR), `price_yearly` (STR)
+- `LandingPageContents` (v3.1): `hero_badge_text` (STR)
+- `GeneralSettings` (v3.2–3.3): `site_logo`, `site_favicon`, `footer_description`, `footer_columns` (JSON), `social_links` (JSON), `footer_powered_by`, `footer_powered_by_url`
+- `Clients` (v3.4, tabel baru): `name`, `logo`, `website`, `order`
+- `Products` (v3.4): `pricing_type` (monthly/yearly/one_time/free), `platform` (JSON array: Web/Mobile/Desktop)
 
 > `footer_columns` = `[{ title, items: [{ label, url }] }]` · `social_links` = `[{ platform, url }]` (platform: instagram/twitter/facebook/linkedin/youtube/website).
-> - **Kolom tambahan pasca-rilis** (v3.1–v3.3): lihat bagian **"Migrasi Manual (Kolom Tambahan)"** di bawah — dijalankan via SQL manual di Supabase karena Vercel tidak auto-sync schema.
+> `platform` produk = `["Web", "Mobile", "Desktop"]` — subset, bisa kosong.
 
 ---
 
@@ -51,14 +74,15 @@ ALTER TABLE "GeneralSettings"
 
 ```
 Users (auth)
-Products (ecosystem showcase)
+Products (ecosystem showcase)          ← pricing_type, platform (v3.4)
 LandingPageContents (singleton - semua konten & theme settings)
 Features ("Why Choose Us" cards)
 Statistics (numbers strip)
 Testimonials (social proof)
 Faqs (accordion FAQ)
-GeneralSettings (singleton - site identity & contacts)
+GeneralSettings (singleton - site identity, contacts, branding)
 Visitors (analytics tracking)
+Clients (pengguna SaduX — logo klien)  ← baru v3.4
 ```
 
 ---
@@ -82,12 +106,17 @@ Visitors (analytics tracking)
 |---|---|---|---|---|
 | `id` | INTEGER | PK, AUTO_INCREMENT | - | Primary key |
 | `name` | STRING | NOT NULL | - | Nama produk/ecosystem |
-| `price` | STRING | NOT NULL | - | Harga (string format: "Contact Sales", "Rp 150.000") |
+| `price` | STRING | NOT NULL | - | Label harga (e.g. "FREE", "Subscription") |
+| `price_monthly` | STRING | NULLABLE | - | Harga per-bulan (e.g. "Rp 150.000") |
+| `price_yearly` | STRING | NULLABLE | - | Harga per-tahun (e.g. "Rp 1.500.000") |
+| `pricing_type` | STRING | - | `'monthly'` | Tipe: `monthly` / `yearly` / `one_time` / `free` |
 | `description` | TEXT | NULLABLE | - | Deskripsi produk |
-| `image` | STRING | NULLABLE | - | Path ke gambar produk |
+| `image` | STRING | NULLABLE | - | Supabase Storage URL gambar produk |
 | `link` | STRING | NULLABLE | - | External URL ke produk |
-| `tag` | STRING | NULLABLE | - | Label tag (e.g. "Esports", "Enterprise") |
-| `click_count` | INTEGER | - | `0` | Jumlah klik tracking |
+| `tag` | STRING | NULLABLE | - | Kategori produk (e.g. "Esports & Olahraga") |
+| `platform` | JSON | - | `[]` | Platform target: `["Web","Mobile","Desktop"]` (subset) |
+| `click_count` | INTEGER | - | `0` | Jumlah klik (tracking) |
+| `order` | INTEGER | - | `0` | Urutan tampil (drag-and-drop di admin) |
 | `createdAt` | DATETIME | AUTO | - | |
 | `updatedAt` | DATETIME | AUTO | - | |
 
@@ -267,40 +296,70 @@ Visitors (analytics tracking)
 
 ---
 
+## Table: `Clients` _(baru v3.4.0)_
+
+> Digunakan untuk section "Pengguna SaduX" di landing page. Tampilkan logo & nama klien.
+
+| Column | Type | Constraints | Default | Description |
+|---|---|---|---|---|
+| `id` | INTEGER | PK, AUTO_INCREMENT | - | Primary key |
+| `name` | STRING | NOT NULL | - | Nama perusahaan klien |
+| `logo` | STRING | NULLABLE | - | Supabase Storage URL logo klien |
+| `website` | STRING | NULLABLE | - | URL website klien |
+| `order` | INTEGER | - | `0` | Urutan tampil (ASC) |
+| `createdAt` | DATETIME | AUTO | - | |
+| `updatedAt` | DATETIME | AUTO | - | |
+
+---
+
 ## API Routes Summary
 
 | Method | Endpoint | Auth | Description |
 |---|---|---|---|
 | GET | `/api/content` | No | Get landing page content |
 | PUT | `/api/content` | Yes | Update landing page content |
-| GET | `/api/products` | No | Get all products |
-| POST | `/api/products` | Yes | Create product |
-| PUT | `/api/products/:id` | Yes | Update product |
+| **Products** | | | |
+| GET | `/api/products` | No | Get all products (ordered by `order` ASC) |
+| POST | `/api/products` | Yes | Create product (incl. `pricing_type`, `platform`) |
+| PUT | `/api/products/:id` | Yes | Update product (incl. `pricing_type`, `platform`) |
 | DELETE | `/api/products/:id` | Yes | Delete product |
 | POST | `/api/products/:id/click` | No | Track product click |
 | PUT | `/api/products/reorder` | Yes | Reorder products (body `{ ids: [...] }`) |
+| **Features** | | | |
 | GET | `/api/features` | No | Get all features |
 | POST | `/api/features` | Yes | Create feature |
 | PUT | `/api/features/:id` | Yes | Update feature |
 | DELETE | `/api/features/:id` | Yes | Delete feature |
+| **Statistics** | | | |
 | GET | `/api/stats` | No | Get all statistics |
 | POST | `/api/stats` | Yes | Create statistic |
 | PUT | `/api/stats/:id` | Yes | Update statistic |
 | DELETE | `/api/stats/:id` | Yes | Delete statistic |
+| **CMS — Settings & Branding** | | | |
 | GET | `/api/cms/settings` | No | Get general settings (incl. logo, favicon, footer) |
 | PUT | `/api/cms/settings` | Yes | Update general settings (incl. footer_columns/social_links) |
 | POST | `/api/cms/logo` | Yes | Upload site logo (image ≤5MB) → Supabase Storage |
 | POST | `/api/cms/favicon` | Yes | Upload favicon (PNG ≤500KB) → Supabase Storage |
+| **CMS — Testimonials** | | | |
 | GET | `/api/cms/testimonials` | No | Get all testimonials |
 | POST | `/api/cms/testimonials` | Yes | Create testimonial |
 | PUT | `/api/cms/testimonials/:id` | Yes | Update testimonial |
 | DELETE | `/api/cms/testimonials/:id` | Yes | Delete testimonial |
+| **CMS — FAQs** | | | |
 | GET | `/api/cms/faqs` | No | Get all FAQs |
 | POST | `/api/cms/faqs` | Yes | Create FAQ |
 | PUT | `/api/cms/faqs/:id` | Yes | Update FAQ |
 | DELETE | `/api/cms/faqs/:id` | Yes | Delete FAQ |
+| **CMS — Clients (v3.4)** | | | |
+| GET | `/api/cms/clients` | No | Get all clients (ordered by `order` ASC) |
+| POST | `/api/cms/clients` | Yes | Create client |
+| PUT | `/api/cms/clients/:id` | Yes | Update client |
+| DELETE | `/api/cms/clients/:id` | Yes | Delete client |
+| POST | `/api/cms/clients/:id/logo` | Yes | Upload client logo → Supabase Storage `clients/` |
+| **Analytics** | | | |
 | POST | `/api/analytics/visit` | No | Track page visit |
 | GET | `/api/analytics/dashboard` | Yes | Get analytics stats |
+| **Auth** | | | |
 | POST | `/api/auth/login` | No | Admin login |
 | POST | `/api/auth/change-password` | Yes | Change own password |
-| POST | `/api/auth/register` | Yes | Register admin (kini admin-only) |
+| POST | `/api/auth/register` | Yes | Register admin (admin-only) |
