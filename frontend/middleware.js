@@ -36,8 +36,8 @@ export default async function middleware(request) {
 
     const title    = s.site_title        || 'SaduX - Company Profile';
     const desc     = s.footer_description || 'Sadulur Teknologi Indonesia — Innovate. Integrate. Inspire.';
-    const logo     = s.site_logo         || '';
-    const favicon  = s.site_favicon      || logo;
+    const logo     = s.site_logo    || 'https://sadux.my.id/logo.png';
+    const favicon  = s.site_favicon || logo;
     const siteName = s.site_name         || 'SaduX';
     const siteUrl  = 'https://sadux.my.id';
 
