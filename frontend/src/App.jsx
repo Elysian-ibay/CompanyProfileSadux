@@ -9,23 +9,66 @@ import Products from './pages/admin/Products';
 import ContentManager from './pages/admin/ContentManager';
 import api from './lib/api';
 
-// Fetch favicon & title globally once on app boot — applies to ALL pages including admin.
+// Fetch CMS settings once at boot → apply favicon, title, and ALL OG/Twitter meta tags.
+// Runs for every route including /admin/* so the browser tab always shows the right icon.
 const applyGlobalBranding = async () => {
   try {
     const res = await api.get('/cms/settings');
     const s = res.data;
-    if (s?.site_favicon) {
+
+    const logo    = s?.site_logo    || '';
+    const favicon = s?.site_favicon || logo;
+    const title   = s?.site_title   || 'SaduX - Company Profile';
+    const desc    = s?.footer_description || 'Sadulur Teknologi Indonesia — Innovate. Integrate. Inspire.';
+    const siteName = s?.site_name   || 'SaduX';
+    const siteUrl  = window.location.origin;
+
+    // ── Favicon (browser tab) ──────────────────────────────────────────────
+    if (favicon) {
       const link = document.getElementById('app-favicon') || (() => {
         const el = document.createElement('link');
-        el.id = 'app-favicon';
-        el.rel = 'icon';
-        document.head.appendChild(el);
-        return el;
+        el.id = 'app-favicon'; el.rel = 'icon';
+        document.head.appendChild(el); return el;
       })();
       link.type = 'image/png';
-      link.href = s.site_favicon;
+      link.href = favicon;
     }
-    if (s?.site_title) document.title = s.site_title;
+
+    // ── Apple touch icon (iOS home screen) ────────────────────────────────
+    if (logo) {
+      const apple = document.getElementById('app-apple-icon') || (() => {
+        const el = document.createElement('link');
+        el.id = 'app-apple-icon'; el.rel = 'apple-touch-icon';
+        document.head.appendChild(el); return el;
+      })();
+      apple.href = logo;
+    }
+
+    // ── Page title ────────────────────────────────────────────────────────
+    document.title = title;
+
+    // ── Helper: set content/attribute on a meta element by ID ─────────────
+    const setMeta = (id, attr, val) => {
+      if (!val) return;
+      const el = document.getElementById(id);
+      if (el) el.setAttribute(attr, val);
+    };
+
+    // ── Standard SEO ──────────────────────────────────────────────────────
+    setMeta('meta-description', 'content', desc);
+
+    // ── Open Graph ────────────────────────────────────────────────────────
+    setMeta('og-title',       'content', title);
+    setMeta('og-description', 'content', desc);
+    setMeta('og-image',       'content', logo);
+    setMeta('og-url',         'content', siteUrl);
+    setMeta('og-site-name',   'content', siteName);
+
+    // ── Twitter / X ───────────────────────────────────────────────────────
+    setMeta('tw-title',       'content', title);
+    setMeta('tw-description', 'content', desc);
+    setMeta('tw-image',       'content', logo);
+
   } catch (_) {}
 };
 applyGlobalBranding();
