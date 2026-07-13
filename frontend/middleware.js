@@ -39,7 +39,7 @@ export default async function middleware(request) {
     const logo     = s.site_logo         || '';
     const favicon  = s.site_favicon      || logo;
     const siteName = s.site_name         || 'SaduX';
-    const siteUrl  = new URL(request.url).origin;
+    const siteUrl  = 'https://sadux.my.id';
 
     const html = `<!doctype html>
 <html lang="id">

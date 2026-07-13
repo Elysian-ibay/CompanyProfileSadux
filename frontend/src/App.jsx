@@ -21,7 +21,7 @@ const applyGlobalBranding = async () => {
     const title   = s?.site_title   || 'SaduX - Company Profile';
     const desc    = s?.footer_description || 'Sadulur Teknologi Indonesia — Innovate. Integrate. Inspire.';
     const siteName = s?.site_name   || 'SaduX';
-    const siteUrl  = window.location.origin;
+    const siteUrl  = 'https://sadux.my.id';
 
     // ── Favicon (browser tab) ──────────────────────────────────────────────
     if (favicon) {
